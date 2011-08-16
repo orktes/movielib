@@ -20,9 +20,18 @@ import javax.swing.JTextArea;
 import org.vatvit.movielib.models.MovieModel;
 import org.vatvit.movielib.objects.Movie;
 
+/**
+ * Elokuvan tietoja ja kansikuvaa esittelevä automaattisesti scrollaava paneeli
+ *
+ */
 public class MovieInfo extends JScrollPane {
 	private Thread scrollProcess;
 	private boolean stopScroll;
+	/**
+	 * Luo uusi tietopaneeli
+	 * @param movie elokuva
+	 * @param coverImage kuva
+	 */
 	public MovieInfo(Movie movie, BufferedImage coverImage) {
 		super();
 		setBackground(new Color(0, 0, 0));
@@ -46,12 +55,18 @@ public class MovieInfo extends JScrollPane {
 		
 	}
 
+	/**
+	 * Pysäytä paneelin scrollaus
+	 */
 	public void stopScrollProcess() {
 		
 		stopScroll=true;
 		
 	}
 	
+	/**
+	 * Aloita paneelin scrollaus
+	 */
 	public void startScrollProcess() {
 		
 		

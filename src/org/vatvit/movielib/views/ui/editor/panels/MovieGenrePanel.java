@@ -1,10 +1,9 @@
 package org.vatvit.movielib.views.ui.editor.panels;
 
-import java.awt.Dimension;
 import java.awt.GridBagLayout;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -12,22 +11,20 @@ import javax.swing.JScrollPane;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JTextField;
-import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.vatvit.movielib.objects.MovieGenre;
-import org.vatvit.movielib.views.ui.menu.panels.MenuImage;
+import org.vatvit.movielib.settings.SettingsLoader;
 
+/**
+ * Elokuvan genrejen muokkaamiseen tarkoitettu paneeli
+ */
 public class MovieGenrePanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -43,9 +40,10 @@ public class MovieGenrePanel extends JPanel {
 	private JButton backButton = null;
 	private JButton nextButton = null;
 	private JButton editButton = null;
-	
+
 	private Vector<MovieGenre> genreData = null;
- //  @jve:decl-index=0:
+
+	// @jve:decl-index=0:
 	/**
 	 * This is the default constructor
 	 */
@@ -60,7 +58,7 @@ public class MovieGenrePanel extends JPanel {
 	 * @return void
 	 */
 	private void initialize() {
-		
+
 		GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
 		gridBagConstraints1.gridx = 0;
 		gridBagConstraints1.fill = GridBagConstraints.BOTH;
@@ -76,15 +74,15 @@ public class MovieGenrePanel extends JPanel {
 		JScrollPane listScroll = new JScrollPane();
 		listScroll.setViewportView(getGenreList());
 		this.add(listScroll, gridBagConstraints);
-		
+
 		this.add(getControlsPanel(), gridBagConstraints1);
-		
+
 	}
 
 	/**
-	 * This method initializes genreList	
-	 * 	
-	 * @return javax.swing.JList	
+	 * This method initializes genreList
+	 * 
+	 * @return javax.swing.JList
 	 */
 	private JList getGenreList() {
 		if (genreList == null) {
@@ -95,27 +93,27 @@ public class MovieGenrePanel extends JPanel {
 				public void valueChanged(ListSelectionEvent arg0) {
 					editButton.setVisible(true);
 					removeButton.setVisible(true);
-					
-					MovieGenre selectedGenre = (MovieGenre)genreList.getSelectedValue();
+
+					MovieGenre selectedGenre = (MovieGenre) genreList
+							.getSelectedValue();
 					nameField.setText(selectedGenre.getTitle());
-					
+
 				}
-				
+
 			});
-				
-			
+
 		}
 		return genreList;
 	}
 
 	/**
-	 * This method initializes controlsPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes controlsPanel
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getControlsPanel() {
 		if (controlsPanel == null) {
-			
+
 			GridBagConstraints gridBagConstraints12 = new GridBagConstraints();
 			gridBagConstraints12.gridx = 1;
 			gridBagConstraints12.gridy = 5;
@@ -133,7 +131,7 @@ public class MovieGenrePanel extends JPanel {
 			gridBagConstraints2.anchor = GridBagConstraints.EAST;
 			gridBagConstraints2.gridy = 1;
 			nameLabel = new JLabel();
-			nameLabel.setText("Nimi:");
+			nameLabel.setText(SettingsLoader.getValue("lang.name", "Nimi:"));
 			GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
 			gridBagConstraints11.fill = GridBagConstraints.BOTH;
 			gridBagConstraints11.gridy = 1;
@@ -145,16 +143,15 @@ public class MovieGenrePanel extends JPanel {
 			controlsPanel.add(nameLabel, gridBagConstraints2);
 			controlsPanel.add(getAddRemoveButtonsPanel(), gridBagConstraints8);
 			controlsPanel.add(getButtonsPanel(), gridBagConstraints12);
-			
-	
+
 		}
 		return controlsPanel;
 	}
 
 	/**
-	 * This method initializes nameField	
-	 * 	
-	 * @return javax.swing.JTextField	
+	 * This method initializes nameField
+	 * 
+	 * @return javax.swing.JTextField
 	 */
 	private JTextField getNameField() {
 		if (nameField == null) {
@@ -164,9 +161,9 @@ public class MovieGenrePanel extends JPanel {
 	}
 
 	/**
-	 * This method initializes addRemoveButtonsPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes addRemoveButtonsPanel
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getAddRemoveButtonsPanel() {
 		GridBagConstraints gridBagConstraints13 = new GridBagConstraints();
@@ -177,7 +174,7 @@ public class MovieGenrePanel extends JPanel {
 		gridBagConstraints10.gridy = 0;
 		GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
 		gridBagConstraints9.anchor = GridBagConstraints.EAST;
-		
+
 		if (addRemoveButtonsPanel == null) {
 			addRemoveButtonsPanel = new JPanel();
 			addRemoveButtonsPanel.setLayout(new GridBagLayout());
@@ -189,9 +186,9 @@ public class MovieGenrePanel extends JPanel {
 	}
 
 	/**
-	 * This method initializes addButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes addButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getAddButton() {
 		if (addButton == null) {
@@ -202,23 +199,29 @@ public class MovieGenrePanel extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					MovieGenre genre = new MovieGenre();
-					genre.setTitle(nameField.getText());
-					
-					genreData.add(genre);
-					genreList.revalidate();
-					repaint();
+					if (nameField.getText().length() > 0) {
+						MovieGenre genre = new MovieGenre();
+						genre.setTitle(nameField.getText());
+
+						genreData.add(genre);
+						genreList.setListData(genreData);
+						genreList.revalidate();
+						genreList.repaint();
+						validate();
+					} else {
+						JOptionPane.showMessageDialog(null, SettingsLoader.getValue("lang.fill_all_fields", "Täytä kaikki kentät"));
+					}
 				}
-				
+
 			});
 		}
 		return addButton;
 	}
 
 	/**
-	 * This method initializes removeButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes removeButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getRemoveButton() {
 		if (removeButton == null) {
@@ -234,28 +237,28 @@ public class MovieGenrePanel extends JPanel {
 					genreData.remove(i);
 					genreList.revalidate();
 					repaint();
-					
-					if(i>0) {
-						genreList.setSelectedIndex(i-1);
-					} else if(genreData.size()>0) {
+
+					if (i > 0) {
+						genreList.setSelectedIndex(i - 1);
+					} else if (genreData.size() > 0) {
 						genreList.setSelectedIndex(0);
 					} else {
 						nameField.setText("");
 						removeButton.setVisible(false);
 						editButton.setVisible(false);
 					}
-				
+
 				}
-				
+
 			});
 		}
 		return removeButton;
 	}
 
 	/**
-	 * This method initializes buttonsPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes buttonsPanel
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getButtonsPanel() {
 		if (buttonsPanel == null) {
@@ -268,37 +271,39 @@ public class MovieGenrePanel extends JPanel {
 	}
 
 	/**
-	 * This method initializes backButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes backButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBackButton() {
 		if (backButton == null) {
 			backButton = new JButton();
-			backButton.setText("Edellinen");
+			backButton.setText(SettingsLoader
+					.getValue("lang.back", "Edellinen"));
 			backButton.setActionCommand("back");
 		}
 		return backButton;
 	}
 
 	/**
-	 * This method initializes nextButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes nextButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getNextButton() {
 		if (nextButton == null) {
 			nextButton = new JButton();
-			nextButton.setText("Seuraava");
+			nextButton
+					.setText(SettingsLoader.getValue("lang.next", "Seuraava"));
 			nextButton.setActionCommand("next");
 		}
 		return nextButton;
 	}
 
 	/**
-	 * This method initializes editButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes editButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getEditButton() {
 		if (editButton == null) {
@@ -310,34 +315,60 @@ public class MovieGenrePanel extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					MovieGenre selectedGenre = (MovieGenre)genreList.getSelectedValue();
+					MovieGenre selectedGenre = (MovieGenre) genreList
+							.getSelectedValue();
 					selectedGenre.setTitle(nameField.getText());
-					
+
 					genreList.revalidate();
 					repaint();
 				}
-				
+
 			});
 		}
 		return editButton;
 	}
-	
+
+	/**
+	 * Asettaa generet
+	 * 
+	 * @param genre
+	 *            genret
+	 */
 	public void setMovieGenre(ArrayList<MovieGenre> genre) {
 		genreData = new Vector<MovieGenre>(genre);
 		genreList.setListData(genreData);
-		
+
 	}
+
+	/**
+	 * Palauttaa genret
+	 * 
+	 * @return genret
+	 */
 	public ArrayList<MovieGenre> getMovieGenre() {
-		
+
 		return new ArrayList<MovieGenre>(genreData);
 	}
+
+	/**
+	 * Lisää tapahtumakuuntelijan back ja next painikkeille
+	 * 
+	 * @param al
+	 *            tapahtumakuuntelija
+	 */
 	public void addActionListener(ActionListener al) {
 		nextButton.addActionListener(al);
 		backButton.addActionListener(al);
 	}
+
+	/**
+	 * Poistaa tapahtumakuuntelijan back ja next painikkeilta
+	 * 
+	 * @param al
+	 *            tapahtumakuuntelija
+	 */
 	public void removeActionListener(ActionListener al) {
 		nextButton.removeActionListener(al);
 		backButton.removeActionListener(al);
 	}
-
 }

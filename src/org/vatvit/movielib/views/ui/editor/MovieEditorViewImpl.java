@@ -17,13 +17,16 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 
+import org.vatvit.movielib.models.MovieModel.ImageSize;
 import org.vatvit.movielib.objects.Movie;
 import org.vatvit.movielib.objects.MovieCast;
 import org.vatvit.movielib.objects.MovieInfoResult;
+import org.vatvit.movielib.settings.SettingsLoader;
 import org.vatvit.movielib.views.CloseListener;
 import org.vatvit.movielib.views.GroupListener;
 import org.vatvit.movielib.views.MovieListener;
 import org.vatvit.movielib.views.MovieView;
+import org.vatvit.movielib.views.ui.menu.panels.MovieInfo;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -44,6 +47,10 @@ import javax.swing.event.ListSelectionListener;
 
 import java.awt.GridBagConstraints;
 
+/**
+ * Elokuvien muokkaamiseen tarkoitettu käyttöliittymä
+ *
+ */
 public class MovieEditorViewImpl extends JFrame implements MovieView {
 
 	private static final long serialVersionUID = 1L;
@@ -65,77 +72,119 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 	private Movie selectedMovie = null;
 	private BufferedImage cover = null;
 	private BufferedImage backdrop = null;
-	
+	private JLabel titleLabel = null;
+	private JFrame loadingFrame=null;
+	private MovieInfo movieContent = null;
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#setCloseListener(org.vatvit.movielib.views.CloseListener)
+	 */
 	@Override
 	public void setCloseListener(CloseListener listener) {
 		this.closeListener = listener;
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#setMovieListener(org.vatvit.movielib.views.MovieListener)
+	 */
 	@Override
 	public void setMovieListener(MovieListener listener) {
 		this.movieListener = listener;
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#setCastListener(org.vatvit.movielib.views.GroupListener)
+	 */
 	@Override
 	public void setCastListener(GroupListener listener) {
 		this.castListener = listener;
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#setDirectorListener(org.vatvit.movielib.views.GroupListener)
+	 */
 	@Override
 	public void setDirectorListener(GroupListener listener) {
 		this.directorListener = listener;
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#setYearListener(org.vatvit.movielib.views.GroupListener)
+	 */
 	@Override
 	public void setYearListener(GroupListener listener) {
 		this.yearListener = listener;
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#setGenreListener(org.vatvit.movielib.views.GroupListener)
+	 */
 	@Override
 	public void setGenreListener(GroupListener listener) {
 		this.genreListener = listener;
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showCast(java.util.ArrayList)
+	 */
 	@Override
 	public void showCast(ArrayList<String> cast) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showGenres(java.util.ArrayList)
+	 */
 	@Override
 	public void showGenres(ArrayList<String> genres) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showDirectors(java.util.ArrayList)
+	 */
 	@Override
 	public void showDirectors(ArrayList<String> directors) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showYears(java.util.ArrayList)
+	 */
 	@Override
 	public void showYears(ArrayList<String> years) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showMovies(java.util.ArrayList)
+	 */
 	@Override
 	public void showMovies(ArrayList<Movie> movies) {
 		moviesList.setListData(new Vector<Movie>(movies));
 		validate();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showMovie(org.vatvit.movielib.objects.Movie)
+	 */
 	@Override
 	public void showMovie(Movie movie) {
 		final MovieEditorViewImpl self = this;
+
+		if(movieContent!=null) {
+			movieContent.stopScrollProcess();
+		}
 		
 		contentPanel.removeAll();
 		// contentPanel.add(getMovieWizardPanel(movie), BorderLayout.CENTER);
@@ -144,16 +193,14 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 		settings.setLayout(new BorderLayout());
 		settings.setSize(new Dimension(369, 165));
 
-		JLabel movieContent = new JLabel("");
-		movieContent.setText("<html><h1>"+movie.toString()+"</h1><br />"+movie.toHTML()+"</html>");
-		movieContent.setVerticalAlignment(SwingConstants.TOP);
-	
-	
+		movieContent = new MovieInfo(movie, movie.getCover(ImageSize.SMALL));
+		movieContent.startScrollProcess();
+
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new FlowLayout());
 		JButton remove = new JButton();
-		remove.setText("Poista");
-		remove.addActionListener(new ActionListener(){
+		remove.setText(SettingsLoader.getValue("lang.remove", "Poista"));
+		remove.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -164,86 +211,124 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 				validate();
 				movieListener.movieList(self);
 			}
-			
+
 		});
 		JButton edit = new JButton();
-		edit.setText("Muokkaa");
-		edit.addActionListener(new ActionListener(){
+		edit.setText(SettingsLoader.getValue("lang.edit", "Muokkaa"));
+		edit.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				MovieWizardPanel wizard = getMovieWizardPanel(selectedMovie);
+				if(movieContent!=null) {
+					movieContent.stopScrollProcess();
+				}
 				contentPanel.removeAll();
-				contentPanel.add(wizard);
+				contentPanel.add(titleLabel, BorderLayout.NORTH);
+				contentPanel.add(wizard, BorderLayout.CENTER);
 				contentPanel.validate();
 			}
-			
+
 		});
 
 		buttons.add(remove);
 		buttons.add(edit);
 		settings.add(buttons, BorderLayout.SOUTH);
 		settings.add(movieContent, BorderLayout.CENTER);
-	
-		
-		
+
 		contentPanel.add(settings);
 		contentPanel.validate();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showCastPreview(java.util.ArrayList)
+	 */
 	@Override
 	public void showCastPreview(ArrayList<Movie> movies) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showGenrePreview(java.util.ArrayList)
+	 */
 	@Override
 	public void showGenrePreview(ArrayList<Movie> movies) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showDirectorPreview(java.util.ArrayList)
+	 */
 	@Override
 	public void showDirectorPreview(ArrayList<Movie> movies) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showYearPreview(java.util.ArrayList)
+	 */
 	@Override
 	public void showYearPreview(ArrayList<Movie> movies) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#init()
+	 */
 	@Override
 	public void init() {
 		setVisible(true);
-		setSize(600, 600);
+		setSize(1024, 700);
 		if (movieListener != null) {
 			movieListener.movieList(this);
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showError(java.lang.String)
+	 */
 	@Override
 	public void showError(String error) {
 		JOptionPane.showMessageDialog(this, error);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#showLoading(java.lang.String)
+	 */
 	@Override
 	public void showLoading(String reason) {
-		// TODO Auto-generated method stub
+		loadingFrame = new JFrame(reason);
+		loadingFrame.setLayout(new BorderLayout());
+		JLabel messageLabel = new JLabel();
+		messageLabel.setText(reason);
+		loadingFrame.add(messageLabel, BorderLayout.CENTER);
+		loadingFrame.setSize(450, 200);
+		loadingFrame.validate();
+		loadingFrame.setVisible(true);
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#hideLoading()
+	 */
 	@Override
 	public void hideLoading() {
-		// TODO Auto-generated method stub
+		if(loadingFrame != null) {
+			loadingFrame.setVisible(false);
+		}
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#getViewName()
+	 */
 	@Override
 	public String getViewName() {
-		
+
 		return "Editori";
 	}
 
@@ -253,41 +338,59 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#getCast()
+	 */
 	@Override
 	public String getCast() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#getDirector()
+	 */
 	@Override
 	public String getDirector() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#getYear()
+	 */
 	@Override
 	public String getYear() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#getMovie()
+	 */
 	@Override
 	public Movie getMovie() {
 		return this.selectedMovie;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#getCover()
+	 */
 	@Override
 	public BufferedImage getCover() {
 		return this.cover;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.MovieView#getBackdrop()
+	 */
 	@Override
 	public BufferedImage getBackdrop() {
 		return this.backdrop;
 	}
 
 	/**
-	 * This is the default constructor
+	 * Luo tyhjän ilmentymän
 	 */
 	public MovieEditorViewImpl() {
 		super();
@@ -295,19 +398,24 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 	}
 
 	/**
-	 * This method initializes this
+	 * Alusta näkymä
 	 * 
 	 * @return void
 	 */
 	private void initialize() {
 		this.setSize(652, 256);
 		this.setContentPane(getJContentPane());
-		this.setTitle("MovieLib 0.1 - Hallinta");
+		this.setTitle("MovieLib " + SettingsLoader.getValue("version", "")
+				+ " - "
+				+ SettingsLoader.getValue("lang.management", "Hallinta"));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		titleLabel = new JLabel("");
+
 	}
 
 	/**
-	 * This method initializes jContentPane
+	 * Luo sisältö paneeli
 	 * 
 	 * @return javax.swing.JPanel
 	 */
@@ -322,7 +430,7 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 	}
 
 	/**
-	 * This method initializes movieWizardPanel
+	 * Luo muokkaus/lisäys wizard
 	 * 
 	 * @return org.vatvit.movielib.views.ui.editor.MovieWizardPanel
 	 */
@@ -335,32 +443,44 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 		}
 
 		final MovieEditorViewImpl self = this;
+		//Kuunnellaan tapahtumia
 		movieWizardPanel.setActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				selectedMovie = movieWizardPanel.getMovie();
-				cover = movieWizardPanel.getCoverAsBufferedImage();
-				backdrop = movieWizardPanel.getBackdropAsBufferedImage();
-				if (movieListener != null) {
-					movieListener.movieSaved(self);
+				if (e.getActionCommand().equalsIgnoreCase("save")) {
+					selectedMovie = movieWizardPanel.getMovie();
+					cover = movieWizardPanel.getCoverAsBufferedImage();
+					backdrop = movieWizardPanel.getBackdropAsBufferedImage();
+					if (movieListener != null) {
+						movieListener.movieSaved(self);
+					}
+					movieListener.movieList(self);
+					contentPanel.removeAll();
+					contentPanel.repaint();
+				} else if (e.getActionCommand().equalsIgnoreCase("cancel")) {
+					contentPanel.removeAll();
+					contentPanel.repaint();
+					movieListener.movieList(self);
 				}
-				movieListener.movieList(self);
-				contentPanel.removeAll();
-				contentPanel.repaint();
 
 			}
 
+		});
+		//Kuunnellaan näkymän vaihtoja
+		movieWizardPanel.setViewChangeListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				titleLabel.setText(SettingsLoader.getValue("lang."+e.getActionCommand()+"_title",e.getActionCommand()));
+
+			}
 		});
 
 		return movieWizardPanel;
 	}
 
-	/**
-	 * This method initializes jSplitPane
-	 * 
-	 * @return javax.swing.JSplitPane
-	 */
+	
 	private JSplitPane getJSplitPane() {
 		if (jSplitPane == null) {
 			jSplitPane = new JSplitPane();
@@ -370,11 +490,7 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 		return jSplitPane;
 	}
 
-	/**
-	 * This method initializes jScrollPane
-	 * 
-	 * @return javax.swing.JScrollPane
-	 */
+	
 	private JScrollPane getJScrollPane() {
 		if (jScrollPane == null) {
 			jScrollPane = new JScrollPane();
@@ -384,7 +500,7 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 	}
 
 	/**
-	 * This method initializes moviesList
+	 * Luo elokuva lista
 	 * 
 	 * @return javax.swing.JList
 	 */
@@ -411,11 +527,7 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 		return moviesList;
 	}
 
-	/**
-	 * This method initializes contentPanel
-	 * 
-	 * @return javax.swing.JPanel
-	 */
+	
 	private JPanel getContentPanel() {
 		if (contentPanel == null) {
 			contentPanel = new JPanel();
@@ -424,11 +536,7 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 		return contentPanel;
 	}
 
-	/**
-	 * This method initializes buttonPanel
-	 * 
-	 * @return javax.swing.JPanel
-	 */
+	
 	private JPanel getButtonPanel() {
 		if (buttonPanel == null) {
 
@@ -439,20 +547,18 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 		return buttonPanel;
 	}
 
-	/**
-	 * This method initializes addButton
-	 * 
-	 * @return javax.swing.JButton
-	 */
+	
 	private JButton getAddButton() {
 		if (addButton == null) {
 			addButton = new JButton();
-			addButton.setText("Lisää");
+			addButton.setText(SettingsLoader.getValue("lang.add", "Lisää"));
 			addButton.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
+
 					contentPanel.removeAll();
+					contentPanel.add(titleLabel, BorderLayout.NORTH);
 					contentPanel.add(getMovieWizardPanel(null),
 							BorderLayout.CENTER);
 					contentPanel.validate();
@@ -462,7 +568,5 @@ public class MovieEditorViewImpl extends JFrame implements MovieView {
 		}
 		return addButton;
 	}
-
-	
 
 } // @jve:decl-index=0:visual-constraint="92,9"

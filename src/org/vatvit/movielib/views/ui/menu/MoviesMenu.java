@@ -22,26 +22,45 @@ import org.vatvit.movielib.objects.Movie;
 import org.vatvit.movielib.views.ui.View;
 import org.vatvit.movielib.views.ui.menu.panels.MovieInfo;
 
+/**
+ * Elokuvien listaukseen tarkoitettu näkymä/valikko
+ *
+ */
 public class MoviesMenu extends View {
 
 	private MenuList menu =null;
 	private MovieInfo currentInfo = null;
 	
+	/**
+	 * Palauttaa näkymän/valikon tapahtumakuuntelijan
+	 * @return tapahtumakuuntelija
+	 */
 	public ActionListener getActionListener() {
 		return menu.getActionListener();
 	}
 	
 
 
+	/**
+	 * Asettaa valikon tapahtumakuutenlijan
+	 * @param actionListener tapahtumakuuntelija
+	 */
 	public void setActionListener(ActionListener actionListener) {
 		menu.setActionListener(actionListener);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.ui.View#focus()
+	 */
 	public void focus() {
 		menu.requestFocus();
 		
 	}
 	
+	/**
+	 * Luo uuden elokuvavalikon
+	 * @param movies elokuvat, joiden perusteella valikko luodaan.
+	 */
 	public MoviesMenu(final ArrayList<Movie> movies) {
 		super();
 		

@@ -21,6 +21,9 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
+/**
+ * JListiä laajentava lista, joka on tarkoitettu toimimaan kokoruudussa ja kuuntelemaan näppäimistön tapahtumia
+ */
 public class MenuList extends JList {
 	private ActionListener al;
 
@@ -28,7 +31,8 @@ public class MenuList extends JList {
 		protected final Border noFocusBorder = new EmptyBorder(15, 1, 1, 1);
 
 		protected DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
-
+		
+		//Luodaan valikkorivin ulkoasu
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value,
 				int index, boolean isSelected, boolean cellHasFocus) {
@@ -77,6 +81,7 @@ public class MenuList extends JList {
 				if (hasFocus()) {
 					if (al == null)
 						return;
+					//Jos kyseessä on enter tai oikealle
 					if (ke.getKeyCode() == KeyEvent.VK_ENTER
 							|| ke.getKeyCode() == KeyEvent.VK_RIGHT) {
 						Object ob[] = getSelectedValues();
@@ -86,11 +91,13 @@ public class MenuList extends JList {
 						al.actionPerformed(new ActionEvent(this,
 								ActionEvent.ACTION_PERFORMED, ob[0].toString()));
 						ke.consume();
+					// ESC tai vasemmalle
 					} else if (ke.getKeyCode() == KeyEvent.VK_ESCAPE
 							|| ke.getKeyCode() == KeyEvent.VK_LEFT) {
 						al.actionPerformed(new ActionEvent(this,
 								ActionEvent.ACTION_PERFORMED, "back"));
 					} else {
+					//Etsi johtuuko kirjaimella alkavaa itemiä valikosta
 						for (int i = 0; i < getModel().getSize(); i++) {
 							if (getModel().getElementAt(i).toString()
 									.toLowerCase().toCharArray()[0] == ke

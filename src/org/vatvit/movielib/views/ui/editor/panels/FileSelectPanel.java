@@ -12,8 +12,14 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JButton;
+
+import org.vatvit.movielib.settings.SettingsLoader;
+
 import java.awt.Dimension;
 
+/**
+ * Tiedoston valitsemiseen tarkoitettu paneeli
+ */
 public class FileSelectPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -73,7 +79,7 @@ public class FileSelectPanel extends JPanel {
 	private JButton getFileSelectButton() {
 		if (fileSelectButton == null) {
 			fileSelectButton = new JButton();
-			fileSelectButton.setText("Valitse");
+			fileSelectButton.setText(SettingsLoader.getValue("lang.select", "Valitse"));
 			fileSelectButton.addActionListener(new ActionListener() {
 
 				@Override
@@ -103,6 +109,10 @@ public class FileSelectPanel extends JPanel {
 		return fileSelectButton;
 	}
 
+	/**
+	 * Aseta tiedostonimi
+	 * @param fileName tiedostonimi
+	 */
 	public void setFileName(String fileName) {
 		fileField.setText(fileName);
 		if(al!=null) {
@@ -111,10 +121,18 @@ public class FileSelectPanel extends JPanel {
      	   al.actionPerformed(actionEvent);
         }
 	}
+	/**
+	 * Palauta tiedostonimi
+	 * @return tiedostonimi
+	 */
 	public String getFileName() {
 		return fileField.getText();
 	}
 	
+	/**
+	 * Aseta kuuntelija kuuntelemaan tiedoston valinnassa tapahtuvia muutoksia.
+	 * @param al
+	 */
 	public void setFileSelectedListener(ActionListener al) {
 		this.al = al;
 	}

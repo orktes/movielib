@@ -1,10 +1,9 @@
 package org.vatvit.movielib.views.ui.editor.panels;
 
-import java.awt.Dimension;
 import java.awt.GridBagLayout;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -12,22 +11,21 @@ import javax.swing.JScrollPane;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JTextField;
-import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.vatvit.movielib.objects.MovieSubtitle;
-import org.vatvit.movielib.views.ui.menu.panels.MenuImage;
+import org.vatvit.movielib.settings.SettingsLoader;
 
+/**
+ * Elokuvan tekstitysten muokkaamiseen tarkoitettu paneeli
+ */
 public class MovieSubtitlesPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -45,11 +43,12 @@ public class MovieSubtitlesPanel extends JPanel {
 	private JButton backButton = null;
 	private JButton nextButton = null;
 	private JButton editButton = null;
-	
+
 	private FileSelectPanel fileSelectPanel = null;
-	
+
 	private Vector<MovieSubtitle> subtitleData = null;
- //  @jve:decl-index=0:
+
+	// @jve:decl-index=0:
 	/**
 	 * This is the default constructor
 	 */
@@ -64,7 +63,7 @@ public class MovieSubtitlesPanel extends JPanel {
 	 * @return void
 	 */
 	private void initialize() {
-		
+
 		GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
 		gridBagConstraints1.gridx = 0;
 		gridBagConstraints1.fill = GridBagConstraints.BOTH;
@@ -80,15 +79,15 @@ public class MovieSubtitlesPanel extends JPanel {
 		JScrollPane listScroll = new JScrollPane();
 		listScroll.setViewportView(getSubtitleList());
 		this.add(listScroll, gridBagConstraints);
-		
+
 		this.add(getControlsPanel(), gridBagConstraints1);
-		
+
 	}
 
 	/**
-	 * This method initializes subtitleList	
-	 * 	
-	 * @return javax.swing.JList	
+	 * This method initializes subtitleList
+	 * 
+	 * @return javax.swing.JList
 	 */
 	private JList getSubtitleList() {
 		if (subtitleList == null) {
@@ -99,30 +98,29 @@ public class MovieSubtitlesPanel extends JPanel {
 				public void valueChanged(ListSelectionEvent arg0) {
 					editButton.setVisible(true);
 					removeButton.setVisible(true);
-					
-					MovieSubtitle selectedSubtitle = (MovieSubtitle)subtitleList.getSelectedValue();
-					labelField.setText(selectedSubtitle.getLabel());		
+
+					MovieSubtitle selectedSubtitle = (MovieSubtitle) subtitleList
+							.getSelectedValue();
+					labelField.setText(selectedSubtitle.getLabel());
 					langField.setText(selectedSubtitle.getLang());
 					fileSelectPanel.setFileName(selectedSubtitle.getLocation());
-						
-					
+
 				}
-				
+
 			});
-				
-			
+
 		}
 		return subtitleList;
 	}
 
 	/**
-	 * This method initializes controlsPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes controlsPanel
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getControlsPanel() {
 		if (controlsPanel == null) {
-			
+
 			GridBagConstraints gridBagConstraints12 = new GridBagConstraints();
 			gridBagConstraints12.gridx = 1;
 			gridBagConstraints12.gridy = 5;
@@ -139,13 +137,12 @@ public class MovieSubtitlesPanel extends JPanel {
 			gridBagConstraints6.gridx = 1;
 			gridBagConstraints6.fill = GridBagConstraints.BOTH;
 			gridBagConstraints6.gridy = 3;
-			
-			
+
 			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
 			gridBagConstraints5.gridx = 0;
 			gridBagConstraints5.anchor = GridBagConstraints.EAST;
 			gridBagConstraints5.gridy = 3;
-			
+
 			fileLabel = new JLabel();
 			fileLabel.setText("Tiedosto:");
 			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
@@ -180,8 +177,7 @@ public class MovieSubtitlesPanel extends JPanel {
 			controlsPanel.add(getFileSelectPanel(), gridBagConstraints6);
 			controlsPanel.add(getAddRemoveButtonsPanel(), gridBagConstraints8);
 			controlsPanel.add(getButtonsPanel(), gridBagConstraints12);
-			
-	
+
 		}
 		return controlsPanel;
 	}
@@ -200,11 +196,10 @@ public class MovieSubtitlesPanel extends JPanel {
 		return langField;
 	}
 
-
 	private FileSelectPanel getFileSelectPanel() {
 		if (fileSelectPanel == null) {
 			fileSelectPanel = new FileSelectPanel();
-			
+
 		}
 		return fileSelectPanel;
 	}
@@ -218,7 +213,7 @@ public class MovieSubtitlesPanel extends JPanel {
 		gridBagConstraints10.gridy = 0;
 		GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
 		gridBagConstraints9.anchor = GridBagConstraints.EAST;
-		
+
 		if (addRemoveButtonsPanel == null) {
 			addRemoveButtonsPanel = new JPanel();
 			addRemoveButtonsPanel.setLayout(new GridBagLayout());
@@ -230,43 +225,55 @@ public class MovieSubtitlesPanel extends JPanel {
 	}
 
 	/**
-	 * This method initializes addButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes addButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getAddButton() {
 		if (addButton == null) {
 			addButton = new JButton();
-			addButton.setText("Lisää");
+			addButton.setText(SettingsLoader.getValue("lang.add", "Lisää"));
 			addButton.setActionCommand("add");
 			addButton.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					MovieSubtitle subtitle = new MovieSubtitle();
-					subtitle.setLabel(labelField.getText());
-					subtitle.setLang(langField.getText());
-					subtitle.setLocation(fileSelectPanel.getFileName());
-					
-					subtitleData.add(subtitle);
-					subtitleList.revalidate();
-					repaint();
+					if (labelField.getText().length() > 0
+							&& fileSelectPanel.getFileName().length() > 0 && (new File(fileSelectPanel.getFileName())).exists()) {
+						MovieSubtitle subtitle = new MovieSubtitle();
+						subtitle.setLabel(labelField.getText());
+						subtitle.setLang(langField.getText());
+						subtitle.setLocation(fileSelectPanel.getFileName());
+
+						subtitleData.add(subtitle);
+						subtitleList.setListData(subtitleData);
+						subtitleList.revalidate();
+						repaint();
+					} else {
+						if((new File(fileSelectPanel.getFileName())).exists()) {
+							JOptionPane.showMessageDialog(null, SettingsLoader.getValue("lang.file_not_found", "Tiedostoa ei löytynyt"));
+						} else {
+							JOptionPane.showMessageDialog(null, SettingsLoader.getValue("lang.fill_all_fields", "Täytä kaikki kentät"));
+						}
+					}
+
 				}
-				
+
 			});
 		}
 		return addButton;
 	}
 
 	/**
-	 * This method initializes removeButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes removeButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getRemoveButton() {
 		if (removeButton == null) {
 			removeButton = new JButton();
-			removeButton.setText("Poista");
+			removeButton.setText(SettingsLoader.getValue("lang.remove",
+					"Poista"));
 			removeButton.setActionCommand("remove");
 			removeButton.setVisible(false);
 			removeButton.addActionListener(new ActionListener() {
@@ -277,10 +284,10 @@ public class MovieSubtitlesPanel extends JPanel {
 					subtitleData.remove(i);
 					subtitleList.revalidate();
 					repaint();
-					
-					if(i>0) {
-						subtitleList.setSelectedIndex(i-1);
-					} else if(subtitleData.size()>0) {
+
+					if (i > 0) {
+						subtitleList.setSelectedIndex(i - 1);
+					} else if (subtitleData.size() > 0) {
 						subtitleList.setSelectedIndex(0);
 					} else {
 						labelField.setText("");
@@ -288,18 +295,18 @@ public class MovieSubtitlesPanel extends JPanel {
 						removeButton.setVisible(false);
 						editButton.setVisible(false);
 					}
-				
+
 				}
-				
+
 			});
 		}
 		return removeButton;
 	}
 
 	/**
-	 * This method initializes buttonsPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes buttonsPanel
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getButtonsPanel() {
 		if (buttonsPanel == null) {
@@ -312,78 +319,107 @@ public class MovieSubtitlesPanel extends JPanel {
 	}
 
 	/**
-	 * This method initializes backButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes backButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getBackButton() {
 		if (backButton == null) {
 			backButton = new JButton();
-			backButton.setText("Edellinen");
+			backButton.setText(SettingsLoader
+					.getValue("lang.back", "Edellinen"));
 			backButton.setActionCommand("back");
 		}
 		return backButton;
 	}
 
 	/**
-	 * This method initializes nextButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes nextButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getNextButton() {
 		if (nextButton == null) {
 			nextButton = new JButton();
-			nextButton.setText("Seuraava");
+			nextButton
+					.setText(SettingsLoader.getValue("lang.next", "Seuraava"));
 			nextButton.setActionCommand("next");
 		}
 		return nextButton;
 	}
 
 	/**
-	 * This method initializes editButton	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes editButton
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getEditButton() {
 		if (editButton == null) {
 			editButton = new JButton();
-			editButton.setText("Tallenna");
+			editButton
+					.setText(SettingsLoader.getValue("lang.save", "Tallenna"));
 			editButton.setActionCommand("edit");
 			editButton.setVisible(false);
 			editButton.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					MovieSubtitle subtitle = (MovieSubtitle)subtitleList.getSelectedValue();
+					MovieSubtitle subtitle = (MovieSubtitle) subtitleList
+							.getSelectedValue();
 					subtitle.setLabel(labelField.getText());
 					subtitle.setLang(langField.getText());
 					subtitle.setLocation(fileSelectPanel.getFileName());
-	
+
 					subtitleList.revalidate();
 					repaint();
 				}
-				
+
 			});
 		}
 		return editButton;
 	}
-	
+
+	/**
+	 * Asettaa elokuvan tekstitykset
+	 * 
+	 * @param subtitle
+	 *            tekstitykset
+	 */
 	public void setMovieSubtitle(ArrayList<MovieSubtitle> subtitle) {
 		subtitleData = new Vector<MovieSubtitle>(subtitle);
 		subtitleList.setListData(subtitleData);
-		
+
 	}
+
+	/**
+	 * Palauttaa tekstitykset
+	 * 
+	 * @return tekstitykset
+	 */
 	public ArrayList<MovieSubtitle> getMovieSubtitle() {
-		
+
 		return new ArrayList<MovieSubtitle>(subtitleData);
 	}
+
+	/**
+	 * Lisää tapahtumakuuntelija
+	 * 
+	 * @param al
+	 *            tapahtumakuuntelija
+	 */
 	public void addActionListener(ActionListener al) {
 		nextButton.addActionListener(al);
 		backButton.addActionListener(al);
 	}
+
+	/**
+	 * Poista tapahtumakuuntelija
+	 * 
+	 * @param al
+	 *            tapahtumakuuntelija
+	 */
 	public void removeActionListener(ActionListener al) {
 		nextButton.removeActionListener(al);
 		backButton.removeActionListener(al);
 	}
-
 }

@@ -3,6 +3,7 @@ package org.vatvit.movielib.views.ui.editor;
 import java.awt.CardLayout;
 
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 
@@ -11,12 +12,12 @@ import org.vatvit.movielib.objects.MovieCast;
 import org.vatvit.movielib.objects.MovieGenre;
 import org.vatvit.movielib.objects.MovieInfoResult;
 import org.vatvit.movielib.objects.MovieSubtitle;
-import org.vatvit.movielib.tools.MovieInfoTools;
+import org.vatvit.movielib.settings.SettingsLoader;
+import org.vatvit.movielib.tools.FileTools;
 import org.vatvit.movielib.views.ui.editor.panels.MovieCastPanel;
 import org.vatvit.movielib.views.ui.editor.panels.MovieDetailsPanel;
 import org.vatvit.movielib.views.ui.editor.panels.MovieFilesPanel;
 import org.vatvit.movielib.views.ui.editor.panels.MovieGenrePanel;
-import org.vatvit.movielib.views.ui.editor.panels.MovieInformationSelectPanel;
 import org.vatvit.movielib.views.ui.editor.panels.MovieNamePanel;
 import org.vatvit.movielib.views.ui.editor.panels.MovieSubtitlesPanel;
 
@@ -29,31 +30,41 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+/**
+ * Elokuvien lisäämiseen ja muokkaamiseen tarkoitettu wizard työkalu.
+ * 
+ */
 public class MovieWizardPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
 	private MovieNamePanel movieName = null;
-	private MovieInformationSelectPanel movieInformationSelect = null;
 	private MovieDetailsPanel movieDetailsPanel = null;
 	private MovieCastPanel movieCastPanel = null;
 	private MovieSubtitlesPanel movieSubtitlesPanel = null;
 	private MovieFilesPanel movieFilesPanel = null;
 	private MovieGenrePanel movieGenrePanel = null;
-
 	private MovieInfoResult selectedMovieInfo = null;
+	private ActionListener viewChangeListener = null; // @jve:decl-index=0:
+	private String currentView = null;
 
 	private ActionListener al = null;
 
 	// @jve:decl-index=0:
 
 	/**
-	 * This is the default constructor
+	 * Luo uusi instanssi
 	 */
 	public MovieWizardPanel() {
 		this(new MovieInfoResult(new Movie(), null, null));
 	}
 
+	/**
+	 * Luo uusi instanssi ja alusta se elokuvan tiedoilla
+	 * 
+	 * @param movie
+	 *            elokuvan tiedot
+	 */
 	public MovieWizardPanel(MovieInfoResult movie) {
 		super();
 		this.selectedMovieInfo = movie;
@@ -71,11 +82,37 @@ public class MovieWizardPanel extends JPanel {
 
 		this.setLayout(new CardLayout());
 		this.add(getMovieNamePanel(), "moviename");
+		showView("moviename");
+	}
+
+	/**
+	 * Näyttää kyseisen näkymän
+	 * 
+	 * @param view
+	 *            nimi
+	 */
+	private void showView(String view) {
+		this.currentView = view;
+		CardLayout layout = (CardLayout) this.getLayout();
+		layout.show(this, view);
+		if (viewChangeListener != null) {
+			// Kerrotaan kuuntelijalle että näkymä on vaihtunut
+			ActionEvent actionEvent = new ActionEvent(this,
+					ActionEvent.ACTION_PERFORMED, view);
+			viewChangeListener.actionPerformed(actionEvent);
+		}
 
 	}
 
+	/**
+	 * Luo uusi elokuvan nimeä kysyvä paneeli.
+	 * 
+	 * @return Paneeli
+	 */
 	private JPanel getMovieNamePanel() {
 		movieName = new MovieNamePanel();
+		// Mikäli elokuva on asetettu ja sillä on nimi asetetaan paneelin
+		// oletusarvoksi jo määritetty nimi.
 		if (selectedMovieInfo.getMovie() != null
 				&& selectedMovieInfo.getMovie().getTitle() != null) {
 			movieName.setMovieName(selectedMovieInfo.getMovie().getTitle());
@@ -83,43 +120,28 @@ public class MovieWizardPanel extends JPanel {
 		}
 
 		final MovieWizardPanel self = this;
+		// Lisätään kuuntelija kuuntelemaan näppäinpainalluksia
 		movieName.addActionListener(new ActionListener() {
 
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see
+			 * java.awt.event.ActionListener#actionPerformed(java.awt.event.
+			 * ActionEvent)
+			 */
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(arg0.getActionCommand());
+				// System.out.println(arg0.getActionCommand());
 				if (arg0.getActionCommand().equalsIgnoreCase("cancel")) {
-					self.setVisible(false);
-				} else if (arg0.getActionCommand().equalsIgnoreCase("search")) {
-					String movieTitle = movieName.getMovieName();
-					ArrayList<MovieInfoResult> movies = MovieInfoTools
-							.getMovieInfo(movieTitle);
-
-					if (movies.size() == 1) {
-						selectedMovieInfo = movies.get(0);
-						self.add(getMovieDetailsPanel("moviename"),
-								"moviedetails");
-						CardLayout layout = (CardLayout) self.getLayout();
-						layout.show(self, "moviedetails");
-					} else if (movies.size() > 1) {
-						self.add(getMovieInformationSelectPanel(movies),
-								"movieselect");
-						CardLayout layout = (CardLayout) self.getLayout();
-						layout.show(self, "movieselect");
-					} else {
-
-						if (selectedMovieInfo.getMovie() == null) {
-							selectedMovieInfo.setMovie(new Movie());
-						}
-
-						selectedMovieInfo.getMovie().setTitle(movieTitle);
-						self.add(getMovieDetailsPanel("moviename"),
-								"moviedetails");
-						CardLayout layout = (CardLayout) self.getLayout();
-						layout.show(self, "moviedetails");
+					if (al != null) {
+						ActionEvent actionEvent = new ActionEvent(this,
+								ActionEvent.ACTION_PERFORMED, "cancel");
+						al.actionPerformed(actionEvent);
 					}
-
-				} else if (arg0.getActionCommand().equalsIgnoreCase("next")) {
+				}  else if (arg0.getActionCommand().equalsIgnoreCase("next")) {
+					// Siirrytään seuraavaan vaiheeseen ilman
+					// tarkistusta/tietojen hakua
 					String movieTitle = movieName.getMovieName();
 
 					if (selectedMovieInfo.getMovie() == null) {
@@ -128,8 +150,8 @@ public class MovieWizardPanel extends JPanel {
 
 					selectedMovieInfo.getMovie().setTitle(movieTitle);
 					self.add(getMovieDetailsPanel("moviename"), "moviedetails");
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviedetails");
+
+					showView("moviedetails");
 
 				}
 
@@ -140,33 +162,13 @@ public class MovieWizardPanel extends JPanel {
 		return movieName;
 	}
 
-	private JPanel getMovieInformationSelectPanel(
-			ArrayList<MovieInfoResult> movies) {
-		movieInformationSelect = new MovieInformationSelectPanel(movies);
-		final MovieWizardPanel self = this;
-		movieInformationSelect.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(arg0.getActionCommand());
-				if (arg0.getActionCommand().equalsIgnoreCase("back")) {
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviename");
-				} else if (arg0.getActionCommand().equalsIgnoreCase("next")) {
-					selectedMovieInfo = movieInformationSelect
-							.getSelectedMovie();
-					self.add(getMovieDetailsPanel("movieselect"),
-							"moviedetails");
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviedetails");
-				}
-
-			}
-
-		});
-		return movieInformationSelect;
-	}
-
+	/**
+	 * Luo perustietojen täyttö paneeli.
+	 * 
+	 * @param previousCard
+	 *            viimeksi ollut näykmä
+	 * @return paneeli
+	 */
 	private JPanel getMovieDetailsPanel(final String previousCard) {
 		movieDetailsPanel = new MovieDetailsPanel();
 		final MovieWizardPanel self = this;
@@ -193,10 +195,10 @@ public class MovieWizardPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(arg0.getActionCommand());
+				// System.out.println(arg0.getActionCommand());
 				if (arg0.getActionCommand().equalsIgnoreCase("back")) {
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, previousCard);
+
+					showView(previousCard);
 				} else if (arg0.getActionCommand().equalsIgnoreCase("next")) {
 					if (selectedMovieInfo.getMovie() == null) {
 						selectedMovieInfo.setMovie(new Movie());
@@ -217,8 +219,8 @@ public class MovieWizardPanel extends JPanel {
 							movieDetailsPanel.getMovieDescription());
 
 					self.add(getMovieGenrePanel(), "moviegenres");
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviegenres");
+
+					showView("moviegenres");
 
 				}
 
@@ -229,6 +231,11 @@ public class MovieWizardPanel extends JPanel {
 
 	}
 
+	/**
+	 * Luo genrejen editointi paneeli
+	 * 
+	 * @return paneeli
+	 */
 	private JPanel getMovieGenrePanel() {
 		movieGenrePanel = new MovieGenrePanel();
 		if (selectedMovieInfo.getMovie() != null
@@ -243,10 +250,10 @@ public class MovieWizardPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(arg0.getActionCommand());
+				// System.out.println(arg0.getActionCommand());
 				if (arg0.getActionCommand().equalsIgnoreCase("back")) {
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviedetails");
+
+					showView("moviedetails");
 				} else if (arg0.getActionCommand().equalsIgnoreCase("next")) {
 					if (selectedMovieInfo.getMovie() == null) {
 						selectedMovieInfo.setMovie(new Movie());
@@ -255,8 +262,8 @@ public class MovieWizardPanel extends JPanel {
 							movieGenrePanel.getMovieGenre());
 
 					self.add(getMovieCastPanel(), "moviecast");
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviecast");
+
+					showView("moviecast");
 
 				}
 
@@ -268,6 +275,11 @@ public class MovieWizardPanel extends JPanel {
 
 	}
 
+	/**
+	 * Luo näyttelijöiden muokkaus näkymä
+	 * 
+	 * @return paneeli
+	 */
 	private JPanel getMovieCastPanel() {
 		movieCastPanel = new MovieCastPanel();
 		if (selectedMovieInfo.getMovie() != null
@@ -281,10 +293,10 @@ public class MovieWizardPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(arg0.getActionCommand());
+				// System.out.println(arg0.getActionCommand());
 				if (arg0.getActionCommand().equalsIgnoreCase("back")) {
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviegenres");
+
+					showView("moviegenres");
 				} else if (arg0.getActionCommand().equalsIgnoreCase("next")) {
 					if (selectedMovieInfo.getMovie() == null) {
 						selectedMovieInfo.setMovie(new Movie());
@@ -293,8 +305,8 @@ public class MovieWizardPanel extends JPanel {
 							movieCastPanel.getMovieCast());
 
 					self.add(getMovieSubtitlesPanel(), "moviesubtitles");
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviesubtitles");
+
+					showView("moviesubtitles");
 
 				}
 
@@ -306,6 +318,11 @@ public class MovieWizardPanel extends JPanel {
 
 	}
 
+	/**
+	 * Luo tekstitysten muokkaus näkymä
+	 * 
+	 * @return paneeli
+	 */
 	private JPanel getMovieSubtitlesPanel() {
 		movieSubtitlesPanel = new MovieSubtitlesPanel();
 		if (selectedMovieInfo.getMovie() != null
@@ -322,10 +339,10 @@ public class MovieWizardPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(arg0.getActionCommand());
+				// System.out.println(arg0.getActionCommand());
 				if (arg0.getActionCommand().equalsIgnoreCase("back")) {
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviecast");
+
+					showView("moviecast");
 				} else if (arg0.getActionCommand().equalsIgnoreCase("next")) {
 					if (selectedMovieInfo.getMovie() == null) {
 						selectedMovieInfo.setMovie(new Movie());
@@ -334,8 +351,8 @@ public class MovieWizardPanel extends JPanel {
 							movieSubtitlesPanel.getMovieSubtitle());
 
 					self.add(getMovieFilesPanel(), "moviefiles");
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviefiles");
+
+					showView("moviefiles");
 
 				}
 
@@ -347,6 +364,11 @@ public class MovieWizardPanel extends JPanel {
 
 	}
 
+	/**
+	 * Luo elokuvan tiedostojen (videotiedosto, kansi, tausta) muokkaus paneeli
+	 * 
+	 * @return paneeli
+	 */
 	private JPanel getMovieFilesPanel() {
 		movieFilesPanel = new MovieFilesPanel();
 
@@ -357,15 +379,14 @@ public class MovieWizardPanel extends JPanel {
 		movieFilesPanel.setCoverLocation(selectedMovieInfo.getCover());
 		movieFilesPanel.setBackdropLocation(selectedMovieInfo.getBackdrop());
 
-		final MovieWizardPanel self = this;
 		movieFilesPanel.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(arg0.getActionCommand());
+				// System.out.println(arg0.getActionCommand());
 				if (arg0.getActionCommand().equalsIgnoreCase("back")) {
-					CardLayout layout = (CardLayout) self.getLayout();
-					layout.show(self, "moviesubtitles");
+
+					showView("moviesubtitles");
 				} else if (arg0.getActionCommand().equalsIgnoreCase("next")) {
 					if (selectedMovieInfo.getMovie() == null) {
 						selectedMovieInfo.setMovie(new Movie());
@@ -377,10 +398,39 @@ public class MovieWizardPanel extends JPanel {
 					selectedMovieInfo.setBackdrop(movieFilesPanel
 							.getBackdropLocation());
 
-					if (al != null) {
-						ActionEvent actionEvent = new ActionEvent(this,
-								ActionEvent.ACTION_PERFORMED, "savemovie");
-						al.actionPerformed(actionEvent);
+					if (movieFilesPanel.getVideoLocation().length() > 0
+							&& ((new File(movieFilesPanel.getVideoLocation())
+									.exists()) || (new File(FileTools
+									.getProgramDirectory()
+									+ File.separator
+									+ movieFilesPanel.getVideoLocation())
+									.exists()))) {
+						if (movieFilesPanel.getCoverLocation().length() == 0) {
+							JOptionPane.showMessageDialog(
+									null,
+									SettingsLoader
+											.getValue(
+													"lang.cover_not_set_adding_without",
+													"Kantta ei ole asetettu. Lisätään ilman."));
+						}
+
+						if (movieFilesPanel.getBackdropLocation().length() == 0) {
+							JOptionPane.showMessageDialog(
+									null,
+									SettingsLoader
+											.getValue(
+													"lang.backdrop_not_set_adding_without",
+													"Tausta ei ole asetettu. Lisätään ilman."));
+						}
+						if (al != null) {
+							ActionEvent actionEvent = new ActionEvent(this,
+									ActionEvent.ACTION_PERFORMED, "save");
+							al.actionPerformed(actionEvent);
+						}
+					} else {
+						JOptionPane.showMessageDialog(null, SettingsLoader
+								.getValue("lang.file_doesnt_exists",
+										"Tiedostoa ei ole olemassa"));
 					}
 
 				}
@@ -393,34 +443,76 @@ public class MovieWizardPanel extends JPanel {
 
 	}
 
+	/**
+	 * Aseta tapahtumakuunteli
+	 * 
+	 * @param al
+	 */
 	public void setActionListener(ActionListener al) {
 		this.al = al;
 	}
 
+	/**
+	 * Aseta elokuva
+	 * 
+	 * @param movie
+	 *            elokuva
+	 */
 	public void setMovie(Movie movie) {
 		selectedMovieInfo.setMovie(movie);
 	}
 
+	/**
+	 * Palauta elokuva
+	 * 
+	 * @return elokuva
+	 */
 	public Movie getMovie() {
 		return selectedMovieInfo.getMovie();
 	}
 
+	/**
+	 * Aseta kansikuva
+	 * 
+	 * @param cover
+	 *            kansikuva
+	 */
 	public void setCover(String cover) {
 		selectedMovieInfo.setCover(cover);
 	}
 
+	/**
+	 * Aseta taustakuva
+	 * 
+	 * @param backdrop
+	 */
 	public void setBackdrop(String backdrop) {
 		selectedMovieInfo.setBackdrop(backdrop);
 	}
 
+	/**
+	 * Palauta kansikuva
+	 * 
+	 * @return kansikuvan osoite
+	 */
 	public String getCover() {
 		return selectedMovieInfo.getCover();
 	}
 
+	/**
+	 * Palauta kansikuva
+	 * 
+	 * @return kansikuvan osoite
+	 */
 	public String getBackdrop() {
 		return selectedMovieInfo.getBackdrop();
 	}
 
+	/**
+	 * Palauttaa kansikuvan BufferedImagena
+	 * 
+	 * @return kansi
+	 */
 	public BufferedImage getCoverAsBufferedImage() {
 		if (this.getCover() != null && this.getCover().length() > 0) {
 			try {
@@ -443,6 +535,11 @@ public class MovieWizardPanel extends JPanel {
 		return null;
 	}
 
+	/**
+	 * Palauttaa taustakuvan BufferedImagena
+	 * 
+	 * @return kansi
+	 */
 	public BufferedImage getBackdropAsBufferedImage() {
 		if (this.getBackdrop() != null && this.getBackdrop().length() > 0) {
 			try {
@@ -463,6 +560,18 @@ public class MovieWizardPanel extends JPanel {
 
 		}
 		return null;
+	}
+
+	/**
+	 * Asettaa tapahtumakuuntelijan seuraamaan näkymän vaihtoja
+	 * 
+	 * @param viewChangeListener
+	 */
+	public void setViewChangeListener(ActionListener viewChangeListener) {
+		this.viewChangeListener = viewChangeListener;
+		ActionEvent actionEvent = new ActionEvent(this,
+				ActionEvent.ACTION_PERFORMED, currentView);
+		viewChangeListener.actionPerformed(actionEvent);
 	}
 
 	public static void main(String[] args) {

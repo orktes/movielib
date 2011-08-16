@@ -1,4 +1,5 @@
 package org.vatvit.movielib.dao;
+
 import java.sql.Connection;
 import java.util.Date;
 import java.sql.PreparedStatement;
@@ -7,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-
 import org.vatvit.movielib.database.DatabaseConnection;
 import org.vatvit.movielib.objects.Movie;
 import org.vatvit.movielib.objects.MovieCast;
@@ -15,15 +15,27 @@ import org.vatvit.movielib.objects.MovieGenre;
 import org.vatvit.movielib.objects.MovieSubtitle;
 import org.vatvit.movielib.models.MovieModel.Field;
 
-
+/**
+ * Tietokannassa olevien elokuvien hakuun ja muokkaamisen tarkoitettu luokka
+ * 
+ */
 public class MovieDAO {
-	
 
+	/**
+	 * Lisää tietokantaan elokuvan
+	 * 
+	 * @param movie
+	 *            lisättävä elokuva
+	 * @return elokuvan id tietokannassa kokonaislukuna
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static int addMovie(Movie movie) throws SQLException,
 			ClassNotFoundException {
 		int id = 0;
 		movie.setAdded(new Date());
-		Connection conn = org.vatvit.movielib.database.DatabaseConnection.getDBConn();
+		Connection conn = org.vatvit.movielib.database.DatabaseConnection
+				.getDBConn();
 		String query = "INSERT INTO movies (title, description, slogan, director, trailer_url, year, rating, added, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement prep = conn.prepareStatement(query);
 		prep.setString(1, movie.getTitle());
@@ -45,6 +57,8 @@ public class MovieDAO {
 		prep.close();
 
 		movie.setId(id);
+
+		// Lisätäään näyttelijät, genret ja tekstitystiedostot
 		if (movie.getCast() != null) {
 			for (MovieCast cast : movie.getCast()) {
 				cast.setMovieId(id);
@@ -61,7 +75,7 @@ public class MovieDAO {
 		} else {
 			movie.setGenres(new ArrayList<MovieGenre>());
 		}
-		
+
 		if (movie.getSubtitles() != null) {
 			for (MovieSubtitle sub : movie.getSubtitles()) {
 				sub.setMovieId(id);
@@ -73,6 +87,15 @@ public class MovieDAO {
 		return id;
 	}
 
+	/**
+	 * Lisää tietokantaan elokuvan näyttelijän
+	 * 
+	 * @param cast
+	 *            lisättävä elokuva
+	 * @return palauttaa lisätyn näyttelijän id:n tietokannassa kokonaislukuna
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static int addMovieCast(MovieCast cast) throws SQLException,
 			ClassNotFoundException {
 		int id = 0;
@@ -96,6 +119,15 @@ public class MovieDAO {
 		return id;
 	}
 
+	/**
+	 * Lisää elokuvan tekstitystiedoston tiedot tietokantaa
+	 * 
+	 * @param sub
+	 *            lisättävä teksitys
+	 * @return teksityksen id tietokannassa
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static int addMovieSubtitle(MovieSubtitle sub) throws SQLException,
 			ClassNotFoundException {
 		int id = 0;
@@ -120,6 +152,15 @@ public class MovieDAO {
 		return id;
 	}
 
+	/**
+	 * Lisää tietokantaan elokuvan genren
+	 * 
+	 * @param genre
+	 *            lisättävä genre
+	 * @return genren id tietokannassa
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static int addMovieGenre(MovieGenre genre) throws SQLException,
 			ClassNotFoundException {
 		int id = 0;
@@ -142,7 +183,17 @@ public class MovieDAO {
 		return id;
 	}
 
-
+	/**
+	 * Hakee tietokannasta elokuva valitun kentän ja hakusanan perusteella
+	 * 
+	 * @param searchField
+	 *            valittu kenttä
+	 * @param search
+	 *            hakusana
+	 * @return tietokannan palauttamat elokuvat
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static int countSearchMovieBy(Field searchField, String search)
 			throws SQLException, ClassNotFoundException {
 		Connection conn = DatabaseConnection.getDBConn();
@@ -181,6 +232,15 @@ public class MovieDAO {
 		return count;
 	}
 
+	/**
+	 * Poistaa elokuvan tietokannasta
+	 * 
+	 * @param id
+	 *            poistettavan elokuvan id
+	 * @return onnistuiko poisto (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static boolean deleteMovie(int id) throws SQLException,
 			ClassNotFoundException {
 		Movie movie = MovieDAO.getMovieById(id);
@@ -200,7 +260,7 @@ public class MovieDAO {
 				MovieDAO.deleteMovieGenre(genre);
 			}
 		}
-	
+
 		if (movie.getSubtitles() != null) {
 			for (MovieSubtitle sub : movie.getSubtitles()) {
 				MovieDAO.deleteMovieSubtitle(sub);
@@ -214,6 +274,15 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Poistaa tietokannasta näyttelijän
+	 * 
+	 * @param id
+	 *            poistettavan näyttelijän id
+	 * @return onnistuiko poisto (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean deleteMovieCast(int id) throws SQLException,
 			ClassNotFoundException {
 		Connection conn = DatabaseConnection.getDBConn();
@@ -229,12 +298,30 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Poistaa tietokannasta näyttelijän
+	 * 
+	 * @param cast
+	 *            poistettava näyttelijä
+	 * @return onnistuiko poisto (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean deleteMovieCast(MovieCast cast) throws SQLException,
 			ClassNotFoundException {
 		return deleteMovieCast(cast.getId());
 
 	}
 
+	/**
+	 * Poistaa tietokannasta tekstityksen
+	 * 
+	 * @param id
+	 *            poistettavan tekstityksen id
+	 * @return onnistuiko poisto (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean deleteMovieSubtitle(int id) throws SQLException,
 			ClassNotFoundException {
 		Connection conn = DatabaseConnection.getDBConn();
@@ -250,12 +337,30 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Poistaa tietokannasta tekstityksen
+	 * 
+	 * @param sub
+	 *            poistettava tekstitys
+	 * @return onnistuiko poisto (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean deleteMovieSubtitle(MovieSubtitle sub)
 			throws SQLException, ClassNotFoundException {
 		return deleteMovieSubtitle(sub.getId());
 
 	}
 
+	/**
+	 * Poistaa tietokannasta genren
+	 * 
+	 * @param id
+	 *            poistettavan genren id
+	 * @return onnistuiko poisto (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean deleteMovieGenre(int id) throws SQLException,
 			ClassNotFoundException {
 		Connection conn = DatabaseConnection.getDBConn();
@@ -271,13 +376,28 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Poistaa tietokannasta genren
+	 * 
+	 * @param genre
+	 *            poistettava genre
+	 * @return onnistuiko poisto (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean deleteMovieGenre(MovieGenre genre)
 			throws SQLException, ClassNotFoundException {
 		return deleteMovieGenre(genre.getId());
 
 	}
 
-
+	/**
+	 * Hakee tietokannasta kaikki näyttelijät
+	 * 
+	 * @return tietokannan palauttamat näyttelijät
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static ArrayList<String> getAllCast() throws SQLException,
 			ClassNotFoundException {
 		ArrayList<String> genres = new ArrayList<String>();
@@ -286,7 +406,7 @@ public class MovieDAO {
 		ResultSet rs = stat
 				.executeQuery("SELECT actor FROM movies_cast GROUP BY actor ORDER BY actor");
 		while (rs.next()) {
-			if(rs.getString("actor").length()>0) {
+			if (rs.getString("actor").length() > 0) {
 				genres.add(rs.getString("actor"));
 			}
 		}
@@ -297,6 +417,13 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Hakee tietokannasta kaikki ohjaajat
+	 * 
+	 * @return tietokannan palauttamat ohjaajat
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static ArrayList<String> getAllDirectors() throws SQLException,
 			ClassNotFoundException {
 		ArrayList<String> genres = new ArrayList<String>();
@@ -305,7 +432,7 @@ public class MovieDAO {
 		ResultSet rs = stat
 				.executeQuery("SELECT director FROM movies GROUP BY director ORDER BY director");
 		while (rs.next()) {
-			if(rs.getString("director").length()>0) {
+			if (rs.getString("director").length() > 0) {
 				genres.add(rs.getString("director"));
 			}
 		}
@@ -316,6 +443,13 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Hakee tietokannasta kaikki genert
+	 * 
+	 * @return tietokannan palauttamat genret
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static ArrayList<String> getAllGenres() throws SQLException,
 			ClassNotFoundException {
 		ArrayList<String> genres = new ArrayList<String>();
@@ -324,7 +458,7 @@ public class MovieDAO {
 		ResultSet rs = stat
 				.executeQuery("SELECT title FROM movies_genres GROUP BY title ORDER BY title");
 		while (rs.next()) {
-			if(rs.getString("title").length()>0) {
+			if (rs.getString("title").length() > 0) {
 				genres.add(rs.getString("title"));
 			}
 
@@ -336,12 +470,28 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Hae kaikki elokuvat ja järjestä tietyn kentän mukaisesti
+	 * 
+	 * @param orderBy
+	 *            kenttä, jonka mukaisesti järjestetään
+	 * @param desc
+	 *            käänteinen järjestys
+	 * @return tietokannan palauttamat elokuvat
+	 * @throws Exception
+	 */
 	public static QueryResult<Movie> getAllMovies(Field orderBy, boolean desc)
 			throws Exception {
-		return searchMovieBy(null, null, 0, 0, null, desc, false, false,
-				false);
+		return searchMovieBy(null, null, 0, 0, null, desc, false, false, false);
 	}
 
+	/**
+	 * Hae tietokannasta kaikki vuodet
+	 * 
+	 * @return tietokannan palauttamat vuodet
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static ArrayList<String> getAllYears() throws SQLException,
 			ClassNotFoundException {
 		ArrayList<String> genres = new ArrayList<String>();
@@ -359,6 +509,15 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Hae tietokannasta näyttelijät elokuvalle
+	 * 
+	 * @param id
+	 *            elokuvan id
+	 * @return elokuvan näyttelijät
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static ArrayList<MovieCast> getCastForMovieId(int id)
 			throws SQLException, ClassNotFoundException {
 		ArrayList<MovieCast> cast = new ArrayList<MovieCast>();
@@ -375,6 +534,15 @@ public class MovieDAO {
 		return cast;
 	}
 
+	/**
+	 * Hae tietokannasta tekstitykset elokuvalle
+	 * 
+	 * @param id
+	 *            elokuvan id
+	 * @return elokuvan teksitykset
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static ArrayList<MovieSubtitle> getSubtitlesForMovieId(int id)
 			throws SQLException, ClassNotFoundException {
 		ArrayList<MovieSubtitle> subs = new ArrayList<MovieSubtitle>();
@@ -391,6 +559,15 @@ public class MovieDAO {
 		return subs;
 	}
 
+	/**
+	 * Hae tietokannasta elokuvan genret
+	 * 
+	 * @param id
+	 *            elokuvan id
+	 * @return elokuvan genret
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static ArrayList<MovieGenre> getGenresForMovieId(int id)
 			throws SQLException, ClassNotFoundException {
 		ArrayList<MovieGenre> genres = new ArrayList<MovieGenre>();
@@ -407,6 +584,15 @@ public class MovieDAO {
 		return genres;
 	}
 
+	/**
+	 * Hae tietokannasta elokuva.
+	 * 
+	 * @param id
+	 *            haettavan elokuva id
+	 * @return tietokannan palauttama elokuva tai null mikäli sellaista ei löydy
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static Movie getMovieById(int id) throws SQLException,
 			ClassNotFoundException {
 		Movie movie = null;
@@ -424,7 +610,6 @@ public class MovieDAO {
 		stat.close();
 		return movie;
 	}
-
 
 	public static void main(String[] args) throws Exception {
 		// TESTIT
@@ -446,8 +631,6 @@ public class MovieDAO {
 		sub.setLang("fi-FI");
 		sub.setLocation("test.srt");
 		movie.getSubtitles().add(sub);
-
-
 
 		System.out.println("Lis�t��n uusi elokuva");
 		int id = MovieDAO.addMovie(movie);
@@ -517,8 +700,6 @@ public class MovieDAO {
 				+ movie.getGenres().size() + " genre�");
 		System.out.println("- " + movie.toString());
 
-		
-
 		// TEKSTITTYKSET
 		System.out.println("Lis�tyll� elokuvalla on nyt "
 				+ movie.getSubtitles().size() + " kpl tekstityst�");
@@ -552,9 +733,9 @@ public class MovieDAO {
 				+ " vastausta. Tulostetaan elokuvat.");
 		for (Movie mov : result.getResults()) {
 			mov.setDescription("Follow a day of the life of Big Buck Bunny when he meets three bullying rodents: Frank, Rinky, and Gamera. The rodents amuse themselves by harassing helpless creatures by throwing fruits, nuts and rocks at them. After the deaths of two of Bunny's favorite butterflies, and an offensive attack on Bunny himself, Bunny sets aside his gentle nature and orchestrates a complex plan for revenge.");
-			//if(mov.getId()<30)MovieDAO.updateMovie(mov);
-			
-			System.out.println(mov.getId()+" - " + mov.toString());
+			// if(mov.getId()<30)MovieDAO.updateMovie(mov);
+
+			System.out.println(mov.getId() + " - " + mov.toString());
 		}
 
 		System.out.println("Poistetaan �skett�in lis�tty elokuva");
@@ -565,6 +746,14 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Muuta ResultSet Movie -olioksi
+	 * 
+	 * @param set
+	 *            muunnettava ResultSet
+	 * @return Movie -olio
+	 * @throws SQLException
+	 */
 	private static Movie resultSetToMovie(ResultSet set) throws SQLException {
 		Movie movie = new Movie();
 		movie.setAdded(new Date(set.getLong("added")));
@@ -577,10 +766,18 @@ public class MovieDAO {
 		movie.setTrailerUrl(set.getString("trailer_url"));
 		movie.setYear((int) set.getInt("year"));
 		movie.setLocation(set.getString("location"));
-		
+
 		return movie;
 	}
 
+	/**
+	 * Muuta ResultSet MovieCast -olioksi
+	 * 
+	 * @param set
+	 *            muunnettava ResultSet
+	 * @return MovieCast -olio
+	 * @throws SQLException
+	 */
 	private static MovieCast resultSetToMovieCast(ResultSet set)
 			throws SQLException {
 		MovieCast cast = new MovieCast();
@@ -593,6 +790,14 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Muuta ResultSet MovieSubtitle -olioksi
+	 * 
+	 * @param set
+	 *            muunnettava ResultSet
+	 * @return MovieSubtitle -olio
+	 * @throws SQLException
+	 */
 	private static MovieSubtitle resultSetToMovieSubtitle(ResultSet set)
 			throws SQLException {
 		MovieSubtitle sub = new MovieSubtitle();
@@ -605,6 +810,14 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Muuta ResultSet MovieGenre -olioksi
+	 * 
+	 * @param set
+	 *            muunnettava ResultSet
+	 * @return MovieGenre -olio
+	 * @throws SQLException
+	 */
 	private static MovieGenre resultSetToMovieGenre(ResultSet set)
 			throws SQLException {
 		MovieGenre genre = new MovieGenre();
@@ -616,13 +829,37 @@ public class MovieDAO {
 
 	}
 
-
+	/**
+	 * Hae elokuvia tietokannasta
+	 * 
+	 * @param searchField
+	 *            Hakukenttä, null = älä käytä hakuehtoa
+	 * @param search
+	 *            Hakuehto
+	 * @param limit
+	 *            Raja kuinka paljon elokuvia palautetaan
+	 * @param page
+	 *            Sivu
+	 * @param orderBy
+	 *            Minkä mukaan elokuvat järjestetään
+	 * @param desc
+	 *            Onko järjestys laskeva
+	 * @param includeCast
+	 *            Liitetäänkö elokuviin näyttelijät
+	 * @param includeGenres
+	 *            Liitetäänkö elokuviin genret
+	 * @param includeSubtitles
+	 *            Liitetäänkö elokuviin tekstitykset
+	 * @return Haun palauttamat elokuvat
+	 * @throws Exception
+	 */
 	public static QueryResult<Movie> searchMovieBy(Field searchField,
 			String search, int limit, int page, Field orderBy, boolean desc,
-			boolean includeCast, boolean includeGenres,
-			boolean includeSubtitles)
+			boolean includeCast, boolean includeGenres, boolean includeSubtitles)
 			throws Exception {
 
+		// Tarkistetaan ettei haussa käytetä kenttiä, jotka eivät kuulu movies
+		// tauluun
 		if (orderBy != null
 				&& ((orderBy == Field.CAST && searchField != Field.CAST) || (orderBy == Field.GENRE && searchField != Field.GENRE))) {
 
@@ -630,7 +867,7 @@ public class MovieDAO {
 					+ " ei movies kentt� joten haku kent�n tulee olla my�s "
 					+ orderBy.name());
 		}
-
+		// luodaan result olio
 		QueryResult<Movie> result = new QueryResult<Movie>();
 		if (searchField != null) {
 			result.setField(searchField.name());
@@ -647,6 +884,7 @@ public class MovieDAO {
 
 		Connection conn = DatabaseConnection.getDBConn();
 
+		// muodostetaan query
 		String query = "SELECT movies.* FROM movies"
 				+ ((searchField != null && searchField == Field.GENRE) ? ", movies_genres"
 						: "")
@@ -697,6 +935,7 @@ public class MovieDAO {
 		while (rs.next()) {
 
 			Movie movie = resultSetToMovie(rs);
+			// tarkistetaan haetaanko elokuville myös muita tietoja
 			if (includeGenres)
 				movie.setGenres(getGenresForMovieId(movie.getId()));
 			if (includeCast)
@@ -713,12 +952,33 @@ public class MovieDAO {
 		return result;
 	}
 
+	/**
+	 * Hae elokuvia tietokannasta
+	 * 
+	 * @param searchField
+	 *            Kenttä, jonka perusteella elokuvia haetaan
+	 * @param search
+	 *            Hakuehto
+	 * @param orderBy
+	 *            Kenttä, jonka mukaan hakuvastaukset järjestetään
+	 * @return tietokannan palauttamat elokuvat
+	 * @throws Exception
+	 */
 	public static QueryResult<Movie> searchMoviesBy(Field searchField,
 			String search, Field orderBy) throws Exception {
 		return searchMovieBy(searchField, search, 0, 0, orderBy, false, false,
 				false, false);
 	}
 
+	/**
+	 * Päivitä elokuvaolion tiedot tietokantaan
+	 * 
+	 * @param movie
+	 *            päivitettävä olio
+	 * @return onnistuiko tallennus (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	public static boolean updateMovie(Movie movie) throws SQLException,
 			ClassNotFoundException {
 		Movie oldMovie = MovieDAO.getMovieById(movie.getId());
@@ -818,9 +1078,7 @@ public class MovieDAO {
 					}
 				}
 			}
-			
 
-			
 			if (movie.getSubtitles() != null) {
 				// SUORITETAAN SUBTITLE LIS�YKSET JA MUUTOKSET
 				for (MovieSubtitle sub : movie.getSubtitles()) {
@@ -861,7 +1119,6 @@ public class MovieDAO {
 				}
 			}
 
-	
 			if (effect == 0) {
 				return false;
 			} else {
@@ -872,6 +1129,15 @@ public class MovieDAO {
 		}
 	}
 
+	/**
+	 * Päivittää näyttelijän tiedot tietokantaa
+	 * 
+	 * @param cast
+	 *            päivitettävä näyttelijä
+	 * @return onnistuiko (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean updateMovieCast(MovieCast cast) throws SQLException,
 			ClassNotFoundException {
 		Connection conn = DatabaseConnection.getDBConn();
@@ -892,6 +1158,15 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Päivittää tekstitysten tiedot tietokantaan
+	 * 
+	 * @param sub
+	 *            päivitettävä tekstitys
+	 * @return onnistuiko (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean updateMovieSubtitle(MovieSubtitle sub)
 			throws SQLException, ClassNotFoundException {
 		Connection conn = DatabaseConnection.getDBConn();
@@ -912,6 +1187,15 @@ public class MovieDAO {
 
 	}
 
+	/**
+	 * Päivittää genret tiedot tietokantaan
+	 * 
+	 * @param genre
+	 *            päivitettävä genre
+	 * @return onnistuiko (totuusarvo)
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
 	private static boolean updateMovieGenre(MovieGenre genre)
 			throws SQLException, ClassNotFoundException {
 		Connection conn = DatabaseConnection.getDBConn();

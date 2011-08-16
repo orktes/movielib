@@ -22,12 +22,24 @@ import org.vatvit.movielib.objects.Movie;
 import org.vatvit.movielib.views.ui.View;
 import org.vatvit.movielib.views.ui.menu.panels.MenuImage;
 
+/**
+ * Elokuva ryhmien selaamiseen tarkoitettu valikko.
+ * Valikko näyttää valitun ryhmän sisältämät elokuvan oikean puoleisessa palstassaan.
+ */
 public class MovieGroupMenu extends BasicMenu {
 
+	/**
+	 * Luo uuden valikon
+	 * @param values valikon arvot
+	 */
 	public MovieGroupMenu(ArrayList<String> values) {
 		super(values);
 	}
 	
+	/**
+	 * Luo parametrinä annetuista elokuvista kannet taulukkoon oikeaan palstaan
+	 * @param movies näytettävät elokuvat
+	 */
 	public void displayInfo(ArrayList<Movie> movies) {
 		JPanel infoPanel = getInfoPanel();
 			infoPanel.setLayout(new java.awt.FlowLayout());

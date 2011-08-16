@@ -38,8 +38,9 @@ public interface MovieModel {
 	 * @param movie
 	 *            poistettava elokuva
 	 * @return totuusarvo siitä onnistuiko poisto
+	 * @throws MovieDeleteException elokuvan poistossa tapahtunut virhe
 	 */
-	public boolean deleteMovie(Movie movie);
+	public boolean deleteMovie(Movie movie) throws MovieDeleteException;
 
 	/**
 	 * Palauttaa id:tä vastaavan elokuvan tiedot
@@ -47,8 +48,9 @@ public interface MovieModel {
 	 * @param id
 	 *            elokuvan id
 	 * @return Movie -luokan ilmentymä täytettynä elokuvan tiedoilla.
+	 * @throws MovieDataRetrieveException elokuvan tietojen haussa tapahtunut virhe
 	 */
-	public Movie getMovie(int id);
+	public Movie getMovie(int id) throws MovieDataRetrieveException;
 
 	/**
 	 * Elokuvien haku.
@@ -73,10 +75,11 @@ public interface MovieModel {
 	 *            Liitetäänkö vastauksiin myös tekstitykset
 	 * @return QueryResult instanssi, joka sisältää tiedot käytetyistä
 	 *         hakuehdoista ja haun vastauksen.
+	 * @throws MovieDataRetrieveException elokuvan tietojen haussa tapahtunut virhe
 	 */
 	public QueryResult<Movie> getMovies(Field searchField, String search,
 			int limit, int page, Field orderBy, boolean desc,
-			boolean includeCast, boolean includeGenres, boolean includeSubtitles);
+			boolean includeCast, boolean includeGenres, boolean includeSubtitles) throws MovieDataRetrieveException;
 
 	/**
 	 * Lisää elokuvan tietovarastoon.
@@ -88,9 +91,10 @@ public interface MovieModel {
 	 * @param backdrop
 	 *            Elokuvan taustakuva
 	 * @return Lisätyn elokuvan id.
+	 * @throws MovieException elokuvan tallennuksessa tapahtunut virhe
 	 */
 	public int saveMovie(Movie movie, BufferedImage cover,
-			BufferedImage backdrop);
+			BufferedImage backdrop) throws MovieException;
 
 	/**
 	 * Palauttaa elokuvan taustakuvan halutussa koossa
@@ -132,22 +136,26 @@ public interface MovieModel {
 	/**
 	 * @return kaikki tietolähteessä olevat näyttelijät ja muut tuotantoryhmän
 	 *         jäsenet
+	 * @throws MovieDataRetrieveException elokuvan tietojen haussa tapahtunut virhe
 	 */
-	public ArrayList<String> getAllCast();
+	public ArrayList<String> getAllCast() throws MovieDataRetrieveException;
 
 	/**
 	 * @return kaikki tietolähteessä olevat ohjaajat
+	 * @throws MovieDataRetrieveException elokuvan tietojen haussa tapahtunut virhe
 	 */
-	public ArrayList<String> getAllDirectors();
+	public ArrayList<String> getAllDirectors() throws MovieDataRetrieveException;
 
 	/**
 	 * @return kaikki tietolähteessä olevat genret
+	 * @throws MovieDataRetrieveException elokuvan tietojen haussa tapahtunut virhe
 	 */
-	public ArrayList<String> getAllGenres();
+	public ArrayList<String> getAllGenres() throws MovieDataRetrieveException;
 
 	/**
 	 * @return kaikki tietolähteessä olevat tuotantovuodet
+	 * @throws MovieDataRetrieveException elokuvan tietojen haussa tapahtunut virhe
 	 */
-	public ArrayList<String> getAllYears();
+	public ArrayList<String> getAllYears() throws MovieDataRetrieveException;
 	
 }

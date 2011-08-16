@@ -8,9 +8,13 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
-import java.awt.Dimension;
-import java.awt.event.ActionListener;
 
+import org.vatvit.movielib.settings.SettingsLoader;
+
+import java.awt.event.ActionListener;
+/**
+ * Elokuvan tiedostojen muokkaamiseen tarkoitettu paneeli 
+ */
 public class MovieFilesPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -55,13 +59,13 @@ public class MovieFilesPanel extends JPanel {
 		gridBagConstraints3.anchor = GridBagConstraints.EAST;
 		gridBagConstraints3.gridy = 2;
 		backgroundLabel = new JLabel();
-		backgroundLabel.setText("Taustakuva:");
+		backgroundLabel.setText(SettingsLoader.getValue("lang.backdrop", "Taustakuva"));
 		GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
 		gridBagConstraints2.gridx = 0;
 		gridBagConstraints2.anchor = GridBagConstraints.EAST;
 		gridBagConstraints2.gridy = 1;
 		coverLabel = new JLabel();
-		coverLabel.setText("Kansikuva:");
+		coverLabel.setText(SettingsLoader.getValue("lang.cover", "Kansikuva:"));
 		GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
 		gridBagConstraints1.gridx = 0;
 		gridBagConstraints1.anchor = GridBagConstraints.EAST;
@@ -72,7 +76,7 @@ public class MovieFilesPanel extends JPanel {
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.gridx = 1;
 		movieFileLabel = new JLabel();
-		movieFileLabel.setText("Video-tiedosto:");
+		movieFileLabel.setText(SettingsLoader.getValue("lang.videofile", "Video-tiedosto"));
 		this.setSize(504, 191);
 		this.setLayout(new BorderLayout());
 		
@@ -148,7 +152,7 @@ public class MovieFilesPanel extends JPanel {
 	private JButton getBackButton() {
 		if (backButton == null) {
 			backButton = new JButton();
-			backButton.setText("Edellinen");
+			backButton.setText(SettingsLoader.getValue("lang.back", "Edellinen"));
 			backButton.setActionCommand("back");
 		}
 		return backButton;
@@ -162,34 +166,66 @@ public class MovieFilesPanel extends JPanel {
 	private JButton getNextButton() {
 		if (nextButton == null) {
 			nextButton = new JButton();
-			nextButton.setText("Valmis");
+			nextButton.setText(SettingsLoader.getValue("lang.ready", "Valmis"));
 			nextButton.setActionCommand("next");
 		}
 		return nextButton;
 	}
 
+	/**
+	 * Palattaa video-tiedoston sijainnin
+	 * @return tiedosto
+	 */
 	public String getVideoLocation() {
 		return movieFileSelectPanel.getFileName();
 	}
+	/**
+	 * Asettaa video-tiedoston sijainnin
+	 * @param location
+	 */
 	public void setVideoLocation(String location) {
 		movieFileSelectPanel.setFileName(location);
 	}
+	/**
+	 * Palauttaa kansikuvan sijainnin
+	 * @return sijainti
+	 */
 	public String getCoverLocation() {
 		return coverFileSelectPanel.getFileName();
 	}
+	/**
+	 * Asettaa kansikuvan sijainnin
+	 * @param location sijain
+	 */
 	public void setCoverLocation(String location) {
 		coverFileSelectPanel.setFileName(location);
 	}
+	/**
+	 * Palauttaa taustakuvan sijainnin
+	 * @return siainti
+	 */
 	public String getBackdropLocation() {
 		return backdropFileSelectPanel.getFileName();
 	}
+	/**
+	 * Asettaa kansikuvan sijainnin
+	 * @param location sijainti
+	 */
 	public void setBackdropLocation(String location) {
 		backdropFileSelectPanel.setFileName(location);
 	}
+	/**
+	 * Lisää tapahtumakuuntelijan back ja next painikkeille
+	 * @param al tapahtumakuuntelija
+	 */
 	public void addActionListener(ActionListener al) {
 		nextButton.addActionListener(al);
 		backButton.addActionListener(al);
 	}
+	/**
+	 * Poistaa tapahtumakuuntelijan back ja next painikkeilta
+	 * @param al tapahtumakuuntelija
+	 */
 	public void removeActionListener(ActionListener al) {
 		nextButton.removeActionListener(al);
 		backButton.removeActionListener(al);

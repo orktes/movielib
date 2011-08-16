@@ -7,20 +7,21 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.vatvit.movielib.settings.SettingsLoader;
+
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
-
+/**
+ * Elokuvan nimen muokkaamiseen ja tietojen hakemiseen tarkoitettu paneeli 
+ */
 public class MovieNamePanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField field = null;
 	private JButton next; 
 	private JButton cancel;
-	private JButton search;
-	
 	/**
 	 * This is the default constructor
 	 */
@@ -51,7 +52,7 @@ public class MovieNamePanel extends JPanel {
 		
 		this.add(contentPanel, BorderLayout.CENTER);
 		
-		JLabel label = new JLabel("Elokuvan nimi:");
+		JLabel label = new JLabel(SettingsLoader.getValue("lang.movie_name","Elokuvan nimi:"));
 		contentPanel.add(label);
 		
 		
@@ -65,30 +66,41 @@ public class MovieNamePanel extends JPanel {
 		cancel.setActionCommand("cancel");
 		panel.add(cancel);
 		
-		search = new JButton("Hae tiedot");
-		search.setActionCommand("search");
-		panel.add(search);
 		
 		next = new JButton("Seuraava");
 		next.setActionCommand("next");
 		panel.add(next);
 		
 	}
+	/**
+	 * Palauttaa elokuvan nimen
+	 * @return nimi
+	 */
 	public String getMovieName() {
 		return field.getText();
 	}
+	/**
+	 * Asettaa elokuvan nimen
+	 * @param name nimi
+	 */
 	public void setMovieName(String name) {
 		field.setText(name);
 	}
+	/**
+	 * Lisää tapahtumakuuntelijan peruuta, haku ja seuraava painikkeille
+	 * @param al tapahtumakuuntelija
+	 */
 	public void addActionListener(ActionListener al) {
 		next.addActionListener(al);
 		cancel.addActionListener(al);
-		search.addActionListener(al);
 	}
+	/**
+	 * Poistaa tapahtumakuuntelijan peruuta, haku ja seuraava painikkeilta
+	 * @param al tapahtumakuuntelija
+	 */
 	public void removeActionListener(ActionListener al) {
 		next.removeActionListener(al);
 		cancel.removeActionListener(al);
-		search.removeActionListener(al);
 	}
 
 	/**

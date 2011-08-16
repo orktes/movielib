@@ -13,6 +13,9 @@ import javax.swing.JPanel;
 import org.vatvit.movielib.objects.Movie;
 import org.vatvit.movielib.objects.MovieCast;
 
+/**
+ * Elokuvan tietojan näyttävä paneeli
+ */
 public class MovieDetails extends JPanel {
 	
 
@@ -21,10 +24,18 @@ public class MovieDetails extends JPanel {
 	
 	
 	
+	/**
+	 * Antaa elokuvan
+	 * @return elokuvan
+	 */
 	public Movie getMovie() {
 		return movie;
 	}
 
+	/**
+	 * Asettaa elokuvan
+	 * @param movie elokuva
+	 */
 	public void setMovie(Movie movie) {
 		this.movie = movie;
 	}
@@ -38,6 +49,10 @@ public class MovieDetails extends JPanel {
 	}
 	
 	
+	/**
+	 * Luo uuden tietopaneelin käyttäen parametrinä annetun elokuvan tietoja
+	 * @param movie elokuva
+	 */
 	public MovieDetails(Movie movie) {
 		super();
 		this.movie=movie;

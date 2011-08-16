@@ -19,6 +19,10 @@ import org.vatvit.movielib.models.MovieModel;
 import org.vatvit.movielib.views.ui.View;
 import org.vatvit.movielib.views.ui.menu.panels.MenuImage;
 
+/**
+ * Yleiskäyttöinen valikko.
+ *
+ */
 public class BasicMenu extends View {
 	private MenuList menu = null;
 	private JPanel infoPanel = null;
@@ -26,39 +30,50 @@ public class BasicMenu extends View {
 
 	
 	
+	/**
+	 * Valikon vasemman puolen info paneeli
+	 * @return paneeli
+	 */
 	public JPanel getInfoPanel() {
 		return infoPanel;
 	}
 
+	/**
+	 * Asettaa valikon vasemman puolen info paneelin
+	 * @param infoPanel paneeli
+	 */
 	public void setInfoPanel(JPanel infoPanel) {
 		this.infoPanel = infoPanel;
 	}
-
-	public JPanel getCenterPanel() {
-		return centerPanel;
-	}
-
-	public void setCenterPanel(JPanel centerPanel) {
-		this.centerPanel = centerPanel;
-	}
-
-	public void setMenu(MenuList menu) {
-		this.menu = menu;
-	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.vatvit.movielib.views.ui.View#focus()
+	 */
 	public void focus() {
 		menu.requestFocus();
 
 	}
 
+	/**
+	 * Palauttaa valikon tapahtumakuuntelijan
+	 * @return tapahtumakuuntelija
+	 */
 	public ActionListener getActionListener() {
 		return menu.getActionListener();
 	}
 
+	/**
+	 * Asettaa valikolle tapahtumakuuntelijan
+	 * @param actionListener tapahtumakuuntelija
+	 */
 	public void setActionListener(ActionListener actionListener) {
 		menu.setActionListener(actionListener);
 	}
 
+	/**
+	 * Luo uuden valikkopaneelin ja asettaa parametrinä annetun ArrayList<String> sisältämät arvot valikkoon
+	 * @param values valikon arvot
+	 */
 	public BasicMenu(final ArrayList<String> values) {
 		super();
 		
@@ -122,6 +137,10 @@ public class BasicMenu extends View {
 	}
 
 
+	/**
+	 * Palauttaa valikon sisältämän MenuList:n
+	 * @return MenuList
+	 */
 	public MenuList getMenu() {
 		return menu;
 	}

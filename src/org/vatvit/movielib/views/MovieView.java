@@ -7,6 +7,11 @@ import org.vatvit.movielib.dao.QueryResult;
 import org.vatvit.movielib.models.MovieModel;
 import org.vatvit.movielib.objects.Movie;
 
+/**
+ * Rajapinta, jonka toteuttavia luokkia voidaan käyttää sovelluksen
+ * näkyminä.
+ * 
+ */
 public interface MovieView {
 
 	// KUUNTELIJOIDEN ASETUS

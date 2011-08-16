@@ -6,10 +6,12 @@ org.vatvit.movielib.database
 org.vatvit.movielib.models
 org.vatvit.movielib.objects
 org.vatvit.movielib.settings
+org.vatvit.movielib.tests
 org.vatvit.movielib.tools
 org.vatvit.movielib.views
 org.vatvit.movielib.views.ui
 org.vatvit.movielib.views.ui.editor
+org.vatvit.movielib.views.ui.editor.panels
 org.vatvit.movielib.views.ui.menu
 org.vatvit.movielib.views.ui.menu.panels
 org.vatvit.movielib.views.ui.player

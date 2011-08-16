@@ -1,36 +1,19 @@
 package org.vatvit.movielib.models;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.CodeSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
-import javax.xml.stream.Location;
-
 import org.vatvit.movielib.dao.MovieDAO;
 import org.vatvit.movielib.dao.QueryResult;
-import org.vatvit.movielib.models.MovieModel.Field;
 import org.vatvit.movielib.objects.Movie;
-import org.vatvit.movielib.objects.MovieGenre;
-import org.vatvit.movielib.objects.MovieInfoResult;
 import org.vatvit.movielib.objects.MovieSubtitle;
-import org.vatvit.movielib.objects.SubtitleImport;
 import org.vatvit.movielib.tools.FileTools;
 import org.vatvit.movielib.tools.ImageTools;
-import org.vatvit.movielib.tools.MovieInfoTools;
 
 /**
  * Tietokantaa tietovarastonaan käyttävä toteutus MovieModel rajapinnasta.
@@ -49,88 +32,10 @@ public class MovieModelImpl implements MovieModel {
 	private BufferedImage notFoundCover = null;
 	private BufferedImage notFoundBackdrop = null;
 
-	/**
-	 * Missä kansiossa sovelluksen tiedostot sijaitsevat
-	 * 
-	 * @return Merkkijonona kansio, jossa sovellus sijaitsee
-	 */
-	private static String getProgramDirectory() {
-		// Jos ajetaan jar tiedostosta
-		CodeSource source = Location.class.getProtectionDomain()
-				.getCodeSource();
-		if (source != null) {
-			return source.getLocation().toString();
-		} else {
-			// Jos ajetaan suoraa class-tiedostoista
-			return new File("").getAbsolutePath();
-		}
-	}
-
-	public static void main(String[] args) {
-		// LUODAAN INSTANSSI
-		System.out.println("Luodaan instanssi modelista");
-		MovieModel model = new MovieModelImpl();
-
-		System.out.println("Luodaan instanssi moviesta");
-		Movie movie = new Movie();
-		ArrayList<MovieInfoResult> details = MovieInfoTools.getMovieInfo("Starwars");
-		if (details.size()>0) {
-			movie = details.get(0).getMovie();
-		} else {
-			movie.setTitle("Big Buck Bunny");
-			movie.setDescription("Follow a day of the life of Big Buck Bunny when he meets three bullying rodents: Frank, Rinky, and Gamera. The rodents amuse themselves by harassing helpless creatures by throwing fruits, nuts and rocks at them. After the deaths of two of Bunny's favorite butterflies, and an offensive attack on Bunny himself, Bunny sets aside his gentle nature and orchestrates a complex plan for revenge.");
-			movie.setDirector("Sacha Goedegebure");
-			movie.setRating(7.8);
-			movie.setSlogan("");
-			movie.setYear(2008);
-			movie.setTrailerUrl("http://www.youtube.com/watch?v=IBTE-RoMsvw");
-			movie.setGenres(new ArrayList<MovieGenre>());
-			MovieGenre genre = new MovieGenre();
-			genre.setTitle("Animation");
-			movie.getGenres().add(genre);
-		}
-		movie.setLocation("/Users/iida/Downloads/The.Vampire.Diaries.S02E17.HDTV.XviD-2HD.avi");
-
-		movie.setSubtitles(new ArrayList<MovieSubtitle>());
-		MovieSubtitle subtitle = new MovieSubtitle();
-		subtitle.setLabel("Suomi");
-		subtitle.setLang("fi-FI");
-		subtitle.setLocation("../VODPalvelu/test-data/demo-subtitles.srt");
-		//movie.getSubtitles().add(subtitle);
-		MovieSubtitle subtitle2 = new MovieSubtitle();
-		subtitle2.setLabel("Suomi2");
-		subtitle2.setLang("fi-FI");
-		subtitle2.setLocation("../VODPalvelu/test-data/demo-subtitles.srt");
-		//movie.getSubtitles().add(subtitle2);
-		BufferedImage cover = null;
-		BufferedImage backdrop = null;
-		if (details.size()>0) {
-			try {
-				cover = ImageIO.read(new URL(details.get(0).getCover()));
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			try {
-				backdrop = ImageIO.read(new URL(details.get(0).getBackdrop()));
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		model.saveMovie(movie, cover, backdrop);
-
-	}
-
+	
 	public MovieModelImpl() {
-		mediaDir = new File(getProgramDirectory() + "/data/");
+		mediaDir = new File(FileTools.getProgramDirectory() + File.separator
+				+ "data" + File.separator);
 	}
 
 	/**
@@ -139,19 +44,14 @@ public class MovieModelImpl implements MovieModel {
 	 * @param movie
 	 *            Tallennettava elokuva
 	 * @return Palauttaa kokonaislukuna elokuvan id:n tietokannassa
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
 	 */
-	private int addMovie(Movie movie) {
+	private int addMovie(Movie movie) throws SQLException,
+			ClassNotFoundException {
 
-		try {
-			return MovieDAO.addMovie(movie);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return 0;
+		return MovieDAO.addMovie(movie);
+
 	}
 
 	/*
@@ -224,6 +124,17 @@ public class MovieModelImpl implements MovieModel {
 		movie.setLocation(cleanFilename(vidTarget.getAbsolutePath()));
 	}
 
+	/**
+	 * Poistaa parametrinä annetun tiedoston
+	 * 
+	 * @param file
+	 *            poistettava tiedosto
+	 */
+	private boolean removeFile(File file) {
+		return file.delete();
+
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -232,18 +143,38 @@ public class MovieModelImpl implements MovieModel {
 	 * .objects.Movie)
 	 */
 	@Override
-	public boolean deleteMovie(Movie movie) {
+	public boolean deleteMovie(Movie movie) throws MovieDeleteException {
 		int id = movie.getId();
+		movie = this.getMovie(id);
+
 		try {
-			return MovieDAO.deleteMovie(id);
+			MovieDAO.deleteMovie(id);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDeleteException(e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDeleteException(e.getMessage());
 		}
-		return false;
+		// Poista videotiedosto
+		removeFile(new File(movie.getLocation()));
+		// Poista kuvatiedostot
+		removeFile(new File(mediaDir.getAbsolutePath() + File.separator
+				+ "covers" + File.separator + movie.getId() + "_small.png"));
+		removeFile(new File(mediaDir.getAbsolutePath() + File.separator
+				+ "backdrops" + File.separator + movie.getId() + "_small.png"));
+		removeFile(new File(mediaDir.getAbsolutePath() + File.separator
+				+ "covers" + File.separator + movie.getId() + "_medium.png"));
+		removeFile(new File(mediaDir.getAbsolutePath() + File.separator
+				+ "backdrops" + File.separator + movie.getId() + "_medium.png"));
+		removeFile(new File(mediaDir.getAbsolutePath() + File.separator
+				+ "covers" + File.separator + movie.getId() + "_large.png"));
+		removeFile(new File(mediaDir.getAbsolutePath() + File.separator
+				+ "backdrops" + File.separator + movie.getId() + "_large.png"));
+		// Tekstitykset
+		for (MovieSubtitle sub : movie.getSubtitles()) {
+			removeFile(new File(sub.getLocation()));
+		}
+
+		return true;
 	}
 
 	/*
@@ -252,18 +183,15 @@ public class MovieModelImpl implements MovieModel {
 	 * @see org.vatvit.movielib.models.MovieModel#getAllActors()
 	 */
 	@Override
-	public ArrayList<String> getAllCast() {
+	public ArrayList<String> getAllCast() throws MovieDataRetrieveException {
 
 		try {
 			return MovieDAO.getAllCast();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		}
-		return null;
 	}
 
 	/*
@@ -272,18 +200,17 @@ public class MovieModelImpl implements MovieModel {
 	 * @see org.vatvit.movielib.models.MovieModel#getAllDirectors()
 	 */
 	@Override
-	public ArrayList<String> getAllDirectors() {
+	public ArrayList<String> getAllDirectors()
+			throws MovieDataRetrieveException {
 
 		try {
 			return MovieDAO.getAllDirectors();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		}
-		return null;
+
 	}
 
 	/*
@@ -292,18 +219,16 @@ public class MovieModelImpl implements MovieModel {
 	 * @see org.vatvit.movielib.models.MovieModel#getAllGenres()
 	 */
 	@Override
-	public ArrayList<String> getAllGenres() {
+	public ArrayList<String> getAllGenres() throws MovieDataRetrieveException {
 
 		try {
 			return MovieDAO.getAllGenres();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		}
-		return null;
+
 	}
 
 	/*
@@ -312,18 +237,15 @@ public class MovieModelImpl implements MovieModel {
 	 * @see org.vatvit.movielib.models.MovieModel#getAllYears()
 	 */
 	@Override
-	public ArrayList<String> getAllYears() {
+	public ArrayList<String> getAllYears() throws MovieDataRetrieveException {
 
 		try {
 			return MovieDAO.getAllYears();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		}
-		return null;
 	}
 
 	/*
@@ -435,21 +357,21 @@ public class MovieModelImpl implements MovieModel {
 	@Override
 	public QueryResult<Movie> getMovies(Field searchField, String search,
 			int limit, int page, Field orderBy, boolean desc,
-			boolean includeCast, boolean includeGenres, boolean includeSubtitles) {
+			boolean includeCast, boolean includeGenres, boolean includeSubtitles)
+			throws MovieDataRetrieveException {
 
 		try {
-			QueryResult<Movie> result = MovieDAO
-			.searchMovieBy(searchField, search, limit, page, orderBy,
-					desc, includeCast, includeGenres, includeSubtitles);
-			for(Movie movie : result.getResults()) {
+			QueryResult<Movie> result = MovieDAO.searchMovieBy(searchField,
+					search, limit, page, orderBy, desc, includeCast,
+					includeGenres, includeSubtitles);
+			for (Movie movie : result.getResults()) {
 				movie.setModel(this);
 			}
 			return result;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieDataRetrieveException(e.getMessage());
 		}
-		return null;
+
 	}
 
 	/**
@@ -461,7 +383,7 @@ public class MovieModelImpl implements MovieModel {
 		if (notFoundCover == null) {
 			try {
 				notFoundCover = ImageIO.read(new File("images" + File.separator
-						+ "elokuvat.png"));
+						+ "notfound.png"));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -479,7 +401,7 @@ public class MovieModelImpl implements MovieModel {
 		if (notFoundBackdrop == null) {
 			try {
 				notFoundBackdrop = ImageIO.read(new File("images"
-						+ File.separator + "elokuvat.png"));
+						+ File.separator + "notfound.png"));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -496,7 +418,7 @@ public class MovieModelImpl implements MovieModel {
 	 * .Movie, java.awt.image.BufferedImage, java.awt.image.BufferedImage)
 	 */
 	public int saveMovie(Movie movie, BufferedImage coverImage,
-			BufferedImage backdropImage) {
+			BufferedImage backdropImage) throws MovieException {
 
 		try {
 
@@ -588,20 +510,15 @@ public class MovieModelImpl implements MovieModel {
 			return movie.getId();
 
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieException(e.getMessage());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieException(e.getMessage());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieException(e.getMessage());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new MovieException(e.getMessage());
 		}
 
-		return 0;
 	}
 
 }
